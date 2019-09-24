@@ -25,14 +25,18 @@ analytes <- c("Cryptosporidium", "Giardia",  # pathogens
               "Carbamazepine", "Salicylic Acid", 
               "Gemfibrozil", "Ibuprofen", "Acetaminophen",
               "Triclosan", "Caffeine", "Fluoxetine")
-              # "Bisphenol A", "Triclosan", "Caffeine", "Fluoxetine")  # Bisphenol A only collected in Phase 2
+# "Bisphenol A", "Triclosan", "Caffeine", "Fluoxetine")  # Bisphenol A only collected in Phase 2
 
 pc.df <- select(pc.raw, DateTimeCollected, DateCollected, LOCGeneral, 
-                Analyte, Result, Units) %>%
+                Analyte, Result, Units, Result_Flag, MRL) %>%
   rename(Location = LOCGeneral) %>%  
   filter(Analyte %in% analytes) %>%  # remove unecessary analytes from dataframe
   filter(Location %in% c("TBF-I", "TBF-E", "SMF-E", "Final Ph1",
                          "DBF-E", "DBF-I", "Final Ph2"))
+
+### fill out Result_Flag information for Phase 1 data
+pc.df <- mutate(pc.df, Detect = ifelse(MRL < Result, TRUE, FALSE)) %>%
+  select(-Result_Flag)
 
 # read in flow and chlorine data
 fc.raw <- read_excel(path = raw.path, sheet = "FlowCl")  # flow and chlorine (mg/L) by date
@@ -90,9 +94,9 @@ comb.df <- comb.df %>%
                            ifelse(Parameter %in% sorption.good, "Good", 
                                   NA))) %>%
   mutate(ClOxidation = ifelse(Parameter %in% chlroxid.poor, "Poor", 
-                           ifelse(Parameter %in% chlroxid.mod, "Moderate", 
-                                  ifelse(Parameter %in% chlroxid.good, "Good",
-                                  NA)))) 
+                              ifelse(Parameter %in% chlroxid.mod, "Moderate", 
+                                     ifelse(Parameter %in% chlroxid.good, "Good",
+                                            NA)))) 
 # save cleaned, combined dataframe
 comb.path <- str_c(data.dir, "cleaned_all-filters.rds")
 write_rds(x=comb.df, path=comb.path)
