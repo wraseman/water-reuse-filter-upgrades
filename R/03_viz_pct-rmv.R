@@ -20,11 +20,12 @@ pctrmv.string <- c("PctRmvTBFilt", "PctRmvSMFilt", "PctRmvDBFilt")
 for (i in 1:length(filter.names)) {
 
   ## Giardia and Cryptosporidium
-  p1.gc <- ggplot(data = filter(all.df, Parameter %in% c("Giardia", "Cryptosporidium")),
+  p1.gc <- ggplot(data = filter(all.df, Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity")),
                   aes_string(x="Parameter", y=pctrmv.string[i])) +
     geom_boxplot() +
     ggtitle(filter.names[i]) +
-    ylab("Percent Removal")
+    ylab("Percent Removal") +
+    ylim(-50, 100)
   print(p1.gc)
   
   ## Contaminants of emerging concern (CEC)
@@ -42,7 +43,13 @@ for (i in 1:length(filter.names)) {
   nonneg.filt <- filter(all.df, get(pctrmv.string[i]) >= 0)
   
   ## Giardia and Cryptosporidium
-
+  p2.gc <- ggplot(filter(nonneg.filt, Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity")),
+                  aes_string(x="Parameter", y=pctrmv.string[i])) +
+    geom_boxplot() +
+    ggtitle(filter.names[i], "(Negative values removed)") +
+    ylab("Percent Removal") +
+    ylim(0, 100)
+  print(p2.gc)
   
   ## Contaminants of emerging concern (CEC)
   ### plot by biodegration and sorption categories
@@ -55,21 +62,29 @@ for (i in 1:length(filter.names)) {
   print(p2.cec)
 }
 
-# # visualize boxplots of percent removal for chlorination
-# ## plot by chlorine oxidation category
-# ggplot(data = filter(all.df, !(Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity"))),
-#        aes(x=ClOxidation, y=PctRmvChlorination, color=ClOxidation)) +
-#   geom_boxplot() +
-#   ggtitle("Post-Chlorination after TBF And SMF") +
-#   ylab("Percent Removal") %>% print
-# 
-# ## plot by chlorine oxidation category for only nonnegative values
-# nonneg.clox <- filter(all.df, PctRmvChlorination >= 0)
-# ggplot(data = filter(nonneg.clox, !(Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity"))),
-#        aes(x=ClOxidation, y=PctRmvChlorination, color=ClOxidation)) +
-#   geom_boxplot() +
-#   ggtitle("Post-Chlorination after TBF And SMF") +
-#   ylab("Percent Removal") %>% print
+# visualize boxplots of percent removal for chlorination
+pctrmvchlor.string <- c("PctRmvChlor1", "PctRmvChlor2")
+
+for (i in 1:length(pctrmvchlor.string)) {
+  ## plot by chlorine oxidation category
+  filt.df <- filter(all.df, !(Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity")))
+  p.chlor <- ggplot(data = filt.df,
+         aes_string(x="ClOxidation", y=pctrmvchlor.string[i], color="ClOxidation")) +
+    geom_boxplot() +
+    ggtitle(str_c("Post-Chlorination Phase", i)) +
+    ylab("Percent Removal")
+  print(p.chlor)
+  
+  ## plot by chlorine oxidation category for only nonnegative values
+  nonneg.clox <- filter(all.df, get(pctrmvchlor.string[i]) >= 0)
+  p.chlornon <- ggplot(data = filter(nonneg.clox, !(Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity"))),
+         aes_string(x="ClOxidation", y=pctrmvchlor.string[i], color="ClOxidation")) +
+    geom_boxplot() +
+    ggtitle(str_c("Post-Chlorination Phase", i), "(Negative values removed)") +
+    ylab("Percent Removal") +
+    ylim(0, 100)
+  print(p.chlornon)
+}
 
 # visualize number of detects and non-detects
 ## dataset contains information on pathogen, contaminants of emerging concern (CEC), 
@@ -79,16 +94,36 @@ filename <- "cleaned_all-filters.rds"
 data.path <- str_c(data.dir, filename)
 tidy.df <- read_rds(path = data.path) 
 
-detect.df <- tidy.df %>% group_by(Location, Detect) %>% count() %>% na.omit
+## visualize detects for CECs
+detect1.df <- filter(tidy.df, !(Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity"))) %>%
+  group_by(Location, Detect) %>% count() %>% na.omit
 
-ggplot(data = filter(detect.df, Detect == TRUE, 
+ggplot(data = filter(detect1.df, Detect == TRUE, 
                      Location %in% c("TBF-I", "TBF-E", "SMF-E", "Final Ph1")), aes(x=Location, y=n)) +
   geom_bar(stat="identity") +
   ylab("Detectable Samples") +
-  ggtitle("Phase 1")
+  ggtitle("Phase 1") +
+  ylim(0, 200)
 
-ggplot(data = filter(detect.df, Detect == TRUE, 
+ggplot(data = filter(detect1.df, Detect == TRUE, 
                      Location %in% c("DBF-E", "DBF-I", "Final Ph2")), aes(x=Location, y=n)) +
   geom_bar(stat="identity") +
   ylab("Detectable Samples") +
-  ggtitle("Phase 2")
+  ggtitle("Phase 2") +
+  ylim(0, 200)
+
+## visualize detects for pathogens
+detect2.df <- filter(tidy.df, Parameter %in% c("Giardia", "Cryptosporidium")) %>%
+  group_by(Location, Detect) %>% count() %>% na.omit
+
+ggplot(data = filter(detect2.df, Detect == TRUE, 
+                     Location %in% c("TBF-I", "TBF-E", "SMF-E", "Final Ph1")), aes(x=Location, y=n)) +
+  geom_bar(stat="identity") +
+  ylab("Detectable Samples") +
+  ggtitle("Phase 1 Pathogen Samples")
+
+ggplot(data = filter(detect2.df, Detect == TRUE, 
+                     Location %in% c("DBF-E", "DBF-I", "Final Ph2")), aes(x=Location, y=n)) +
+  geom_bar(stat="identity") +
+  ylab("Detectable Samples") +
+  ggtitle("Phase 2 Pathogen Samples")

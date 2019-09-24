@@ -65,12 +65,6 @@ dbf.df <- filter(all.df, Location %in% c("DBF-E", "DBF-I", "Final Ph2"),
                  Parameter != "Flow") %>%
   select(-DateTimeCollected, -Detect)
 
-## get mean value for all triplicates
-## source: https://stackoverflow.com/questions/31215795/removing-duplicate-rows-and-calculate-the-average-in-a-dataframe-in-r
-dbf.df <- group_by(dbf.df, DateCollected, Location, Parameter) %>%
-  mutate_each(list(mean), -(c(Units, Biodeg, Sorption, ClOxidation))) %>%
-  distinct
-
 ## match units for Giardia and Cryptosporidium for all locations.
 ##  some measures are oocysts (or cysts) per Liter and others per 100 Liters
 dbf.units <- mutate(dbf.df, 
@@ -88,12 +82,27 @@ dbf.units <- mutate(dbf.df,
                         Units)
   )
 
+## get mean value for all triplicates
+## source: https://stackoverflow.com/questions/31215795/removing-duplicate-rows-and-calculate-the-average-in-a-dataframe-in-r
+dbf.units <- group_by(dbf.units, DateCollected, Location, Parameter) %>%
+  mutate_each(list(mean), -(c(Units, Biodeg, Sorption, ClOxidation))) %>%
+  distinct
+
 ## spread the data to wide format to calculate percent removals
 dbf.wide <- spread(dbf.units, Location, Value)
 colnames(dbf.wide)[8:10] <- c("DBFiltEffluent", "DBFiltInfluent", "ChlorEffluent2")
 dbf.wide <- select(dbf.wide, DateCollected, Parameter, DBFiltInfluent, 
                    DBFiltEffluent, ChlorEffluent2,
                    Biodeg, Sorption, ClOxidation, Units, MRL)
+
+## correct for issue with inconsistent MRL for Pathogen tests
+## source: https://stackoverflow.com/questions/40820120/merging-two-rows-with-some-having-missing-values-in-r
+dbf.wide <- dbf.wide %>% group_by(DateCollected, Parameter)  %>% 
+  summarise_each(funs(max(., na.rm = TRUE))) 
+
+## source: https://stackoverflow.com/questions/30990961/replace-inf-nan-and-na-values-with-zero-in-a-dataset-in-r
+is.na(dbf.wide)<-sapply(dbf.wide, is.infinite)
+dbf.wide[is.na(dbf.wide)] <- NA
 
 ## add whether or not a parameter was detected
 dbf.wide <- mutate(dbf.wide, ChlorEff2Detect = ifelse(MRL < ChlorEffluent2, TRUE, FALSE),
@@ -110,14 +119,7 @@ dbf.wide <- mutate(dbf.wide,
 # combine both dataframes 
 all.wide <- bind_rows(tsf.wide, dbf.wide)
 
-## correct for issue with inconsistent MRL for Pathogen tests
-## source: https://stackoverflow.com/questions/40820120/merging-two-rows-with-some-having-missing-values-in-r
-all.wide <- all.wide %>% group_by(DateCollected, Parameter)  %>% 
-  summarise_each(funs(max(., na.rm = TRUE))) 
 
-## source: https://stackoverflow.com/questions/30990961/replace-inf-nan-and-na-values-with-zero-in-a-dataset-in-r
-is.na(all.wide)<-sapply(all.wide, is.infinite)
-all.wide[is.na(all.wide)] <- NA
 
 # save cleaned, combined dataframe
 data.path <- str_c(data.dir, "pct-rmv.rds")
