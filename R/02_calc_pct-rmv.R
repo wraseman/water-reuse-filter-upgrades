@@ -59,6 +59,8 @@ tsf.wide <- mutate(tsf.wide,
                    PctRmvTBFilt = (TBFiltInfluent - TBFiltEffluent) / TBFiltInfluent * 100)
 tsf.wide <- mutate(tsf.wide, 
                    PctRmvChlor1 = (ChlorInfluent1 - ChlorEffluent1) / ChlorInfluent1 * 100)
+tsf.wide <- mutate(tsf.wide, 
+                   PctRmvTotal1 = (TBFiltInfluent - ChlorEffluent1) / TBFiltInfluent * 100)
 
 # create dataframe for deep bed filter (DBF) analysis (i.e., Phase 2)
 dbf.df <- filter(all.df, Location %in% c("DBF-E", "DBF-I", "Final Ph2"), 
@@ -115,6 +117,8 @@ dbf.wide <- mutate(dbf.wide,
                    PctRmvDBFilt = (DBFiltInfluent - DBFiltEffluent) / DBFiltInfluent * 100)
 dbf.wide <- mutate(dbf.wide, 
                    PctRmvChlor2 = (DBFiltEffluent - ChlorEffluent2) / DBFiltEffluent * 100)
+dbf.wide <- mutate(dbf.wide, 
+                   PctRmvTotal2 = (DBFiltInfluent - ChlorEffluent2) / DBFiltInfluent * 100)
 
 # combine both dataframes 
 all.wide <- bind_rows(tsf.wide, dbf.wide)

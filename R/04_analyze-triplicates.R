@@ -104,7 +104,7 @@ print(p1)
 dev.off()
 
 # create dataframe for deep bed filter (DBF) analysis (i.e., Phase 2)
-dbf.df <- filter(all.df, Location %in% c("DBF-E", "DBF-I", "Final Ph2"),
+dbf.df <- filter(all.df, Location %in% c("DBF-I", "DBF-E", "Final Ph2"),
                  Parameter != "Flow") %>%
   select(-DateTimeCollected, -Detect)
 

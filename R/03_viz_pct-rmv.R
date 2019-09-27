@@ -25,7 +25,8 @@ mytheme = theme(
   axis.text.x = element_text(size = 16),
   axis.title.y = element_text(size = 16),
   axis.text.y = element_text(size = 16),
-  title = element_text(size = 18))
+  title = element_text(size = 18),
+  legend.text = element_text(size = 16))
 
 samplesize <- function(y) 
   c(label=length(y), y=median(y))
@@ -39,6 +40,7 @@ for (i in 1:length(filter.names)) {
     ggtitle(filter.names[i]) +
     ylab("Percent Removal") +
     ylim(-50, 100) +
+    stat_summary(fun.data=samplesize, geom="text", vjust=1, col="black", size=6) + # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
     mytheme 
   tiff(filename = str_c(figure.dir, "pathogens_", pctrmv.string[i], ".tiff"),
        height = 12, width = 17, units = 'cm', 
@@ -109,7 +111,8 @@ for (i in 1:length(pctrmvchlor.string)) {
     ggtitle(str_c("Post-Chlorination Phase ", i)) +
     ylab("Percent Removal") +
     xlab("Chlorine Oxidation") +
-    mytheme
+    mytheme +
+    ylim(-50, 100)
   tiff(filename = str_c(figure.dir, "CECs_", pctrmvchlor.string[i], ".tiff"),
        height = 12, width = 17, units = 'cm', 
        compression = "lzw", res = fig.resolution)
@@ -145,7 +148,7 @@ tidy.df <- read_rds(path = data.path)
 ### source: https://sebastiansauer.github.io/ordering-bars/
 tidy.df$Location <- factor(tidy.df$Location, levels = 
                              c("TBF-I", "TBF-E", "SMF-E", "Final Ph1", 
-                               "DBF-E", "DBF-I", "Final Ph2"))
+                               "DBF-I", "DBF-E", "Final Ph2"))
 
 ## visualize detects for CECs
 detect1.df <- filter(tidy.df, !(Parameter %in% c("Giardia", "Cryptosporidium", "Turbidity"))) %>%
