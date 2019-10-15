@@ -1,5 +1,4 @@
-# Purpose: calculate percent removal for filters and disinfection
-# Output: ./data/pct-rmv_dbf.rds
+# Purpose: calculate and visualize percent removal for filters and disinfection
 # Author: William Raseman
 
 # clear environment
@@ -7,6 +6,29 @@ rm(list = ls())
 
 # load packages
 library(tidyverse)  # ggplot2, dplyr for data wrangling and visualization
+
+# read in chlorine data
+## biowin
+
+
+
+# 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # read in cleaned data for all filters
 ## dataset contains information on pathogen, contaminants of emerging concern (CEC), 

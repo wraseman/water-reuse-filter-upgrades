@@ -44,6 +44,11 @@ pctrmv.df <- ungroup(filt.cec) %>%
                              ifelse(FilterType == "PctRmvSMFilt", "SMF", 
                                     ifelse(FilterType == "PctRmvDBFilt", "DBF", NA))))
 
+#### specify order of filter types for boxplots
+pctrmv.df$FilterType <- factor(pctrmv.df$FilterType,
+                       levels = c("SMF", "TBF", "DBF"), ordered = TRUE)
+
+
 p1 <- ggplot(data = filter(pctrmv.df), aes(x=FilterType, y=PercentRemoval)) +
   geom_boxplot() +
   ylab("Percent Removal") +
@@ -109,6 +114,12 @@ pctrmv.cryp <- select(filt.cryp, PctRmvTBFilt, PctRmvSMFilt, PctRmvDBFilt) %>%
                              ifelse(FilterType == "PctRmvSMFilt", "SMF", 
                                     ifelse(FilterType == "PctRmvDBFilt", "DBF", NA))))
 
+#### specify order of filter types for boxplots
+pctrmv.cryp$FilterType <- factor(pctrmv.cryp$FilterType,
+                               levels = c("SMF", "TBF", "DBF"), ordered = TRUE)
+
+
+
 p4 <- ggplot(data = filter(pctrmv.cryp), aes(x=FilterType, y=PercentRemoval)) +
   geom_boxplot() +
   ylab("Percent Removal") +
@@ -131,6 +142,10 @@ pctrmv.giar <- select(filt.giar, PctRmvTBFilt, PctRmvSMFilt, PctRmvDBFilt) %>%
                              ifelse(FilterType == "PctRmvSMFilt", "SMF", 
                                     ifelse(FilterType == "PctRmvDBFilt", "DBF", NA))))
 
+#### specify order of filter types for boxplots
+pctrmv.giar$FilterType <- factor(pctrmv.giar$FilterType,
+                                 levels = c("SMF", "TBF", "DBF"), ordered = TRUE)
+
 p5 <- ggplot(data = filter(pctrmv.giar), aes(x=FilterType, y=PercentRemoval)) +
   geom_boxplot() +
   ylab("Percent Removal") +
@@ -152,6 +167,10 @@ pctrmv.turb <- select(filt.turb, PctRmvTBFilt, PctRmvSMFilt, PctRmvDBFilt) %>%
   mutate(FilterType = ifelse(FilterType == "PctRmvTBFilt", "TBF", 
                              ifelse(FilterType == "PctRmvSMFilt", "SMF", 
                                     ifelse(FilterType == "PctRmvDBFilt", "DBF", NA))))
+
+#### specify order of filter types for boxplots
+pctrmv.turb$FilterType <- factor(pctrmv.turb$FilterType,
+                                 levels = c("SMF", "TBF", "DBF"), ordered = TRUE)
 
 p6 <- ggplot(data = filter(pctrmv.turb), aes(x=FilterType, y=PercentRemoval)) +
   geom_boxplot() +
