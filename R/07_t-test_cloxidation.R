@@ -41,45 +41,92 @@ filt.cec <- filter(all.df, !(Parameter %in% c("Giardia", "Cryptosporidium", "Tur
 filt.cec$ClOxidation <- factor(filt.cec$ClOxidation, levels = 
                                 c("Poor", "Moderate", "Good"))
 
-pctrmv.cl <- select(filt.cec, PctRmvChlor1, PctRmvChlor2) %>%
-  gather(key = "Phase", value = "PercentRemoval") %>%
+pctrmv.cl <- select(filt.cec, PctRmvChlor1, PctRmvChlor2, ClOxidation) %>%
+  gather(key = "Phase", value = "PercentRemoval", -ClOxidation) %>%
   mutate(Phase = ifelse(Phase == "PctRmvChlor1", "1",
                         ifelse(Phase == "PctRmvChlor2", "2", NA)))
 
 ## one-sample t Test where null hypothesis is the distribution has mean zero
+
+### Is Phase 1 or Phase 2 removal due to chlorination significantly different than zero?
 mu.hyp <- 0
-phase1.pctrmv <- filter(pctrmv.cl, Phase == 1)$PercentRemoval %>% unlist
+phase1.pctrmv <- filter(pctrmv.cl, Phase == 1)$PercentRemoval %>% na.omit %>% unlist
 onesamp.ttest.phase1 <- t.test(x=phase1.pctrmv, mu=mu.hyp)
 onesamp.phase1.p <- onesamp.ttest.phase1$p.value
+# p = 0.24
 
-phase2.pctrmv <- filter(pctrmv.cl, Phase == 2)$PercentRemoval %>% unlist
+phase2.pctrmv <- filter(pctrmv.cl, Phase == 2)$PercentRemoval %>% na.omit %>% unlist
 onesamp.ttest.phase2 <- t.test(x=phase2.pctrmv, mu=mu.hyp)
 onesamp.phase2.p <- onesamp.ttest.phase2$p.value
+# p = 0.01
+
+### For Phase 1, are different chlorination oxidation categories significantly different than zero?
+#### Phase 1 - "Poor", "Moderate", "Good"
+poor.ph1.pctrmv <- filter(pctrmv.cl, Phase == 1, ClOxidation == "Poor")$PercentRemoval %>% na.omit %>% 
+  unlist
+onesamp.p.poor.ph1 <- t.test(x=poor.ph1.pctrmv, mu=mu.hyp)$p.value
+  
+mod.ph1.pctrmv <- filter(pctrmv.cl, Phase == 1, ClOxidation == "Moderate")$PercentRemoval %>% na.omit %>% 
+  unlist
+onesamp.p.mod.ph1 <- t.test(x=mod.ph1.pctrmv, mu=mu.hyp)$p.value  
+
+good.ph1.pctrmv <- filter(pctrmv.cl, Phase == 1, ClOxidation == "Good")$PercentRemoval %>% na.omit %>% 
+  unlist
+onesamp.p.good.ph1 <- t.test(x=good.ph1.pctrmv, mu=mu.hyp)$p.value  
+
+#### Phase 2 - "Poor", "Moderate", "Good"
+poor.ph2.pctrmv <- filter(pctrmv.cl, Phase == 2, ClOxidation == "Poor")$PercentRemoval %>% na.omit %>% 
+  unlist
+onesamp.p.poor.ph2 <- t.test(x=poor.ph2.pctrmv, mu=mu.hyp)$p.value
+
+mod.ph2.pctrmv <- filter(pctrmv.cl, Phase == 2, ClOxidation == "Moderate")$PercentRemoval %>% na.omit %>% 
+  unlist
+onesamp.p.mod.ph2 <- t.test(x=mod.ph2.pctrmv, mu=mu.hyp)$p.value  
+
+good.ph2.pctrmv <- filter(pctrmv.cl, Phase == 2, ClOxidation == "Good")$PercentRemoval %>% na.omit %>% 
+  unlist
+onesamp.p.good.ph2 <- t.test(x=good.ph2.pctrmv, mu=mu.hyp)$p.value  
 
 
-# p <- ggplot(data = filter(pctrmv.cl), aes(x=Phase, y=PercentRemoval)) +
-#   geom_boxplot() +
-#   ylab("Percent Removal") +
-#   ylim(-50, 100) +
-#   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-#   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.5, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
-#   mytheme 
+# visualize phase 1 vs. phase 2 chlorine oxidation
+## unbounded
+p1 <- ggplot(data = filter(pctrmv.cl), aes(x=Phase, y=PercentRemoval)) +
+  geom_boxplot() +
+  ylab("Percent Removal") +
+  geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
+  # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.5, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
+  mytheme
+tiff(filename = str_c(figure.dir, "ttest_clox1", ".tiff"),
+     height = 12, width = 17, units = 'cm',
+     compression = "lzw", res = fig.resolution)
+print(p1)
+dev.off()
 
-# for (i in 1:length(pctrmvchlor.string)) {
-  ## plot by chlorine oxidation category
+## bounded version
+p2 <- ggplot(data = filter(pctrmv.cl), aes(x=Phase, y=PercentRemoval)) +
+  geom_boxplot() +
+  ylab("Percent Removal") +
+  ylim(-50, 100) +
+  geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
+  # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.5, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
+  mytheme
+tiff(filename = str_c(figure.dir, "ttest_clox2", ".tiff"),
+     height = 12, width = 17, units = 'cm',
+     compression = "lzw", res = fig.resolution)
+print(p2)
+dev.off()
 
-  # 
-  # p.chlor <- ggplot(data = filt.df,
-  #                   aes_string(x="ClOxidation", y=pctrmvchlor.string[i], fill="ClOxidation")) +
-  #   geom_boxplot(alpha= 0.7) +
-  #   ggtitle(str_c("Post-Chlorination Phase ", i)) +
-  #   ylab("Percent Removal") +
-  #   xlab("Chlorine Oxidation") +
-  #   mytheme +
-  #   ylim(-50, 100)
-  # tiff(filename = str_c(figure.dir, "CECs_", pctrmvchlor.string[i], ".tiff"),
-  #      height = 12, width = 17, units = 'cm', 
-  #      compression = "lzw", res = fig.resolution)
-  # print(p.chlor)
-  # dev.off()
-# }
+## plot by chlorine oxidation category
+p3 <- ggplot(data = pctrmv.cl,
+             aes(x=ClOxidation, y=PercentRemoval, fill=ClOxidation)) +
+  geom_boxplot(alpha= 0.7) +
+  facet_wrap(Phase ~ .) +
+  ylab("Percent Removal") +
+  xlab("Chlorine Oxidation") +
+  geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
+  mytheme
+tiff(filename = str_c(figure.dir, "ttest_clox3", ".tiff"),
+     height = 12, width = 17, units = 'cm',
+     compression = "lzw", res = fig.resolution)
+print(p3)
+dev.off()

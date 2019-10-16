@@ -53,7 +53,7 @@ p1 <- ggplot(data = filter(pctrmv.df), aes(x=FilterType, y=PercentRemoval)) +
   geom_boxplot() +
   ylab("Percent Removal") +
   xlab("Filter Type") +
-  ylim(-50, 100) +
+  # ylim(-50, 100) +
   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
   mytheme 
@@ -185,6 +185,22 @@ tiff(filename = str_c(figure.dir, "turb_filter", ".tiff"),
      height = 12, width = 17, units = 'cm',
      compression = "lzw", res = fig.resolution)
 print(p6)
+dev.off()
+
+## empty plot
+
+p7 <- ggplot(data = filter(pctrmv.df), aes(x=FilterType, y=PercentRemoval)) +
+  # geom_boxplot() +
+  ylab("Percent Removal") +
+  xlab("Filter Type") +
+  ylim(-50, 100) +
+  # geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
+  # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
+  mytheme 
+tiff(filename = str_c(figure.dir, "empty_CECs_pctrmv", ".tiff"),
+     height = 12, width = 17, units = 'cm',
+     compression = "lzw", res = fig.resolution)
+print(p7)
 dev.off()
 
 
