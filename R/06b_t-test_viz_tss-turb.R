@@ -1,4 +1,5 @@
 # Purpose: analyze operational data (TSS and turbidity) that Albrey sent
+# Output: TSS-turbidity.rds
 # Author: William Raseman 
 
 # Note from Albrey: 
@@ -126,3 +127,7 @@ dev.off()
 ## result of t Test
 tss.ttest <- t.test(x=df2.ph1$weekly_rollmean_TSS_effluent, y=df2.ph2$weekly_rollmean_TSS_effluent)$p.value
 turb.ttest <- t.test(x=df2.ph1$weekly_rollmean_turb_effluent, y=df2.ph2$weekly_rollmean_turb_effluent)$p.value
+
+# write data 
+write_rds(df1, str_c(data.dir, "TSS-turbidity.rds"))
+write_rds(df2, str_c(data.dir, "TSS-turbidity_7day-avg.rds"))
