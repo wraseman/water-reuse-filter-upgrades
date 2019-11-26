@@ -1,6 +1,6 @@
 # Purpose: read in and clean data from California laboratory results
-#   Data includes pathogen and contaminants of emerging concern (CEC) concentrations
-# Output: ./data/cleaned_all-filters.rds (tidy, cleaned dataframe)
+#   Data includes contaminants of emerging concern (CEC) concentrations
+# Output: ./data/eurofins-data/clean/california-lab-results_clean.rds (tidy, cleaned dataframe)
 # Author: William Raseman
 
 # clear environment
@@ -40,7 +40,7 @@ ca.df1 <- read_excel(str_c(ca.dir, excel.array[1]), range = cell_cols("A:AI"),
 ## select only the columns that are needed and remove whitespace from column names
 selected.cols <- c("Sample ID", "Sample Date", "Sample Time", 
                       "Analyte", "Result", "Detection Limit", 
-                      "Units", "Dilution")
+                      "Units", "Dilution", "QC Name")
 ca.df2 <- select(ca.df1, selected.cols)
 cols.no.spaces <- str_replace_all(selected.cols, " ", "")
 colnames(ca.df2) <- cols.no.spaces
@@ -62,7 +62,7 @@ id.df <- read_excel(str_c(ca.dir, id.table))
 colnames(id.df) <- c("SampleID", "ClientID")
 id.df$SampleID <- as.character(id.df$SampleID)
 
-## join data with sample ID and clean data
+## join data with sample ID to get the "client ID" which contains location information and filter type
 ca.df5 <- left_join(ca.df4, id.df)  # add sample location (raw data) using Sample ID key
 
 ## identify duplicate and triplicate samples and extract location
@@ -79,8 +79,50 @@ triplicates <- c("Final-3", "DBF-E-3", "DBF-I-3",
 ca.df6 <- ca.df5 %>%
   mutate(Duplicate = if_else(ClientID %in% duplicates, TRUE, FALSE),
          Triplicate = if_else(ClientID %in% triplicates, TRUE, FALSE)) %>%  # identify duplicate and triplicate samples
-  mutate(Location = str_sub(ClientID, 1, 5)) %>%  # extract location from Client ID
-  filter(Location != "LTB")  # remove "LTB" samples (I do not know what this abbreviation stands for)
+  mutate(LocationProcessType = str_sub(ClientID, 1, 5))  %>%  # extract location from Client ID
+  filter(is.na(QCName))  %>% # remove quality control data except for laboratory trip blanks (LTB)
+  select(-QCName)
+  
+## get location and filter type
+influents <- c("TBF-I", "DBF-I")
+effluents <- c("TBF-E", "SMF-E", "Final", "DBF-E")
+clearwell <- "Final"
+blank <- "LTB"
+tbf <- c("TBF-I", "TBF-E")  # traveling bridge filters
+smf <- "SMF-E"  # synthetic media filters
+dbf <- c("DBF-I", "DBF-E")  # deep bed filtration
 
-## 
+## unpack LocationProcessType to extract whether location is influent/effluent and what the unit process is
+ca.df7 <- ca.df6 %>%
+  ### specify whether it is a process influent or effluent and the process type
+  mutate(ProcessInfEff = 
+                   if_else(LocationProcessType %in% influents, "Influent", 
+                           if_else(LocationProcessType %in% effluents, "Effluent", 
+                                   NA_character_))) %>%
+  ### determine the process type: filter (TBF, SMF, DBF), clearwell, or laboratory blank (technically not a process)
+  mutate(Process1 = if_else(LocationProcessType %in% tbf, "TBF",
+                            if_else(LocationProcessType %in% smf, "SMF",
+                                    if_else(LocationProcessType %in% dbf, "DBF", 
+                                            if_else(LocationProcessType %in% clearwell, "clearwell",
+                                                    if_else(LocationProcessType %in% blank, "lab_blank",
+                                                            NA_character_)))))) %>%
+  ### in the plant, the stream is bifurcated between TBF and SMF. This stream is 
+  ###   called "TBF-I" but it is actually the infuent for both TBF and SMF. 
+  ###   For this reason, need to specify a secondary process type for TBF-I
+  mutate(Process2 = if_else(LocationProcessType == "TBF-I", "SMF", NA_character_))
+  
+  ### LocationProcessType matrix
+  ## TBF-I - ProcessInfEff = Influent, Process1 = TBF, Process2 = SMF
+  ## TBF-E - ProcessInfEff = Effluent, Process1 = TBF, Process2 = NA
+  ## SMF-E - ProcessInfEff = Effluent, Process1 = SMF, Process2 = NA
+  ## Final - ProcessInfEff = Effluent, Process1 = clearwell, Process2 = NA
+  ## LTB   - ProcessInfEff - NA      , Process1 = lab_blank, Process2 = NA
+  ## DBF-I - ProcessInfEff = Influent, Process1 = DBF, Process2 = NA
+  ## DBF-E - ProcessInfEff = Effluent, Process1 = DBF, Process2 = NA
 
+## account for dilution of samples
+ca.df8 <- mutate(ca.df7, DilutAdjResult = Result * Dilution)  # calculate concentration after adjusting for lab dilution
+
+# save cleaned data
+clean.path <- str_c(ef.dir, "clean/", "california-lab-results_clean.rds")
+write_rds(x=ca.df8, path=clean.path)
