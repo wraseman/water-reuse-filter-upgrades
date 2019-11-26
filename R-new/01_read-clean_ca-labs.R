@@ -122,25 +122,30 @@ ca.df7 <- ca.df6 %>%
                            if_else(LocationProcessType %in% effluents, "Effluent", 
                                    NA_character_))) %>%
   ### determine the process type: filter (TBF, SMF, DBF), clearwell, or laboratory blank (technically not a process)
-  mutate(Process1 = if_else(LocationProcessType %in% tbf, "TBF",
+  mutate(Process = if_else(LocationProcessType %in% tbf, "TBF",
                             if_else(LocationProcessType %in% smf, "SMF",
                                     if_else(LocationProcessType %in% dbf, "DBF", 
                                             if_else(LocationProcessType %in% clearwell, "clearwell",
                                                     if_else(LocationProcessType %in% blank, "lab_blank",
-                                                            NA_character_)))))) %>%
-  ### in the plant, the stream is bifurcated between TBF and SMF. This stream is 
-  ###   called "TBF-I" but it is actually the infuent for both TBF and SMF. 
-  ###   For this reason, need to specify a secondary process type for TBF-I
-  mutate(Process2 = if_else(LocationProcessType == "TBF-I", "SMF", NA_character_))
+                                                            NA_character_))))))
+## in the plant, the stream is bifurcated between TBF and SMF. This stream is 
+##   called "TBF-I" but it is actually the infuent for both TBF and SMF. 
+##   For this reason, duplicate all TBF-I to specify Process = "SMF" and ProcessInfEff = "Influent"
+smf.inf <- filter(ca.df7, Process == "TBF", ProcessInfEff == "Influent") %>%
+  mutate(Process = "SMF")
+
+## add duplicated observations for TBF-I
+ca.df7 <- bind_rows(ca.df7, smf.inf)
   
-  ### LocationProcessType matrix
-  ## TBF-I - ProcessInfEff = Influent, Process1 = TBF, Process2 = SMF
-  ## TBF-E - ProcessInfEff = Effluent, Process1 = TBF, Process2 = NA
-  ## SMF-E - ProcessInfEff = Effluent, Process1 = SMF, Process2 = NA
-  ## Final - ProcessInfEff = Effluent, Process1 = clearwell, Process2 = NA
-  ## LTB   - ProcessInfEff - NA      , Process1 = lab_blank, Process2 = NA
-  ## DBF-I - ProcessInfEff = Influent, Process1 = DBF, Process2 = NA
-  ## DBF-E - ProcessInfEff = Effluent, Process1 = DBF, Process2 = NA
+### LocationProcessType matrix
+## TBF-I - ProcessInfEff = Influent, Process = TBF
+## TBF-I - ProcessInfEff = Influent, Process = SMF (note that this is a special case)
+## TBF-E - ProcessInfEff = Effluent, Process = TBF
+## SMF-E - ProcessInfEff = Effluent, Process = SMF
+## Final - ProcessInfEff = Effluent, Process = clearwell
+## LTB   - ProcessInfEff - NA      , Process = lab_blank
+## DBF-I - ProcessInfEff = Influent, Process = DBF
+## DBF-E - ProcessInfEff = Effluent, Process = DBF
 
 ## account for dilution of samples
 ca.df8 <- mutate(ca.df7, DilutAdjResult = Result * Dilution)  # calculate concentration after adjusting for lab dilution
