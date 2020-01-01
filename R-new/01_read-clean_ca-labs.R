@@ -54,7 +54,7 @@ nondetect.index <- ca.df3$Result=="ND"
 ca.df3$Result[nondetect.index] <- NA
 
 ca.df3 <- mutate(ca.df3, Result = as.numeric(Result))  # convert Result to numeric
-
+  
 ## combine date and time information into a single datetime column
 ca.df4 <- mutate(ca.df3, SampleTime = hms::as_hms(SampleTime)) %>%
   mutate(SampleDateTime = as.POSIXct(str_c(SampleDate, SampleTime), format="%Y-%m-%d %H:%M:%S")) %>%
@@ -67,7 +67,7 @@ id.df$SampleID <- as.character(id.df$SampleID)
 
 ## join data with Sample ID to get the "client ID" which contains location information and filter type
 ### account for errors in Eurofins data entry for Sample ID
-id.errors <- c("2885588", "3124086", "3124087")
+id.errors <- c("2885588", "3124086", "3124087")  # errors identified manually by author of this code
 id.corrections <- c("3885588", "3421086", "3421087")
 
 ca.df5 <- mutate(ca.df4, SampleID = if_else(SampleID==id.errors[1], id.corrections[1],
@@ -150,6 +150,39 @@ ca.df7 <- bind_rows(ca.df7, smf.inf)
 ## account for dilution of samples
 ca.df8 <- mutate(ca.df7, DilutAdjResult = Result * Dilution)  # calculate concentration after adjusting for lab dilution
 
+### make Process influent and effluent factors so when plotted as boxplot or barplot, influent comes before effluent
+ca.df8$ProcessInfEff <- factor(ca.df8$ProcessInfEff,
+                               levels = c("Influent", "Effluent"))
+
+## filter data for compounds of interest
+## keep columns and analytes necessary for analysis
+analytes <- c("Meprobamate", "Dilantin", "Sulfamethoxazole", 
+              "BPA", "TCEP", "TCPP",
+              "Carbamazepine", "Salicylic Acid", 
+              "Gemfibrozil", "Ibuprofen", "Acetaminophen",
+              "Triclosan", "Caffeine", "Fluoxetine")
+ca.df9 <- filter(ca.df8, Analyte %in% analytes)
+
+### compare analyte names in lab data and analytes array
+matching.analytes <- (analytes %in% ca.df8$Analyte) 
+mismatched <- analytes[matching.analytes==FALSE]
+check.analytes <- all(matching.analytes, TRUE)
+
+## assign biodegradation, sorption, and chlorine oxidation categories for each analyte
+bsc.table <- read_excel(str_c(ef.dir, "Biodeg-Sorp-ClOx_key.xlsx")) %>%
+  ### convert columns to factors
+  mutate(Biodegradation = as.factor(Biodegradation), 
+         Sorption = as.factor(Sorption), 
+         ClOxidation = as.factor(ClOxidation))
+
+ca.df10 <- left_join(ca.df9, bsc.table)  # add biodegration, sorption, and chlorine oxidation categories to dataframe
+
+## removed redundant rows in the data
+### note: this is NOT removing data from the triplicate analysis, it is removing
+###   samples that appear twice in the dataset
+ca.df11 <- unique(ca.df10)
+
 # save cleaned data
 clean.path <- str_c(ef.dir, "clean/", "california-lab-results_clean.rds")
-write_rds(x=ca.df8, path=clean.path)
+write.df <- ca.df11
+write_rds(x=write.df, path=clean.path)
