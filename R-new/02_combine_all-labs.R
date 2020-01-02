@@ -44,7 +44,7 @@ comb.df2 <- comb.df1 %>%
   mutate(DilutAndLimAdjResult = LimitAdjResult * Dilution)  # adjust for dilution
 
 # save dataframe
-write.df <- comb.df1
+write.df <- comb.df2
 ef.dir <- "./data/eurofins-data/"
 clean.path <- str_c(ef.dir, "clean/", "combined-lab-results_clean.rds")
 write_rds(x=write.df, path=clean.path)
