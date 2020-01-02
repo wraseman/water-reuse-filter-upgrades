@@ -9,8 +9,8 @@ library(tidyverse)  # ggplot2, dplyr for data wrangling and visualization
 library(readxl)  # read Excel spreadsheets
 
 # user-defined functions
-medianboxplt <- function(y) 
-  c(label=median(y) %>% round(1), y=median(y))
+# medianboxplt <- function(y) 
+#   c(label=median(y) %>% round(1), y=median(y))
 
 # read in percent removal data
 calc.dir <- "./data/eurofins-data/calculated/"
@@ -32,6 +32,7 @@ mytheme = theme(
   axis.title.y = element_text(size = 16),
   axis.text.y = element_text(size = 16),
   title = element_text(size = 18),
+  plot.subtitle = element_text(size = 12),
   legend.text = element_text(size = 16))
 
 ### specify order of filter types for boxplots
@@ -48,7 +49,7 @@ names(filter.fullnames) <- c("SMF", "TBF", "DBF")  # abbreviations
 ## plots with full extent of removal data
 p1 <- ggplot(df2, aes(x=Process, y=PctRmvFilt)) +
   geom_boxplot() +
-  ylab("Percent Removal") +
+  ylab("Removal by Filtration (%)") +
   xlab("Filter Type") +
   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
@@ -86,10 +87,10 @@ for (process in filters) {
   ## plot with full extent of removal data
   p3 <- ggplot(temp.df2, aes(x=Sorption, y=PctRmvFilt)) +
     geom_boxplot() +
-    ylab("Percent Removal") +
-    xlab("Sorption") +
+    ylab("Removal by Filtration (%)") +
+    xlab("Sorption Category") +
     geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-    ggtitle(filter.fullnames[[process]]) +
+    ggtitle(process) +
     mytheme 
   
   ### save plot as .tiff
@@ -123,10 +124,10 @@ for (process in filters) {
   ## plot with full extent of removal data
   p5 <- ggplot(temp.df2, aes(x=Biodegradation, y=PctRmvFilt)) +
     geom_boxplot() +
-    ylab("Percent Removal") +
-    xlab("Biodegradability") +
+    ylab("Removal by Filtration (%)") +
+    xlab("Biodegradability Category") +
     geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-    ggtitle(filter.fullnames[[process]]) +
+    ggtitle(process) +
     mytheme 
   
   ### save plot as .tiff
@@ -171,8 +172,8 @@ for (process in filters) {
   p7 <- ggplot(data = temp.df3,
                aes_string(x="BiodegSorption", y="PctRmvFilt", fill="BiodegSorption")) +
     geom_boxplot(alpha= 0.7) +
-    ggtitle(filter.fullnames[[process]]) +
-    ylab("Percent Removal") +
+    ggtitle(process) +
+    ylab("Removal by Filtration (%)") +
     xlab("Biodegradability and Sorption Categories") +
     mytheme +
     theme(legend.position="none")
@@ -200,147 +201,3 @@ for (process in filters) {
   print(p8)
   dev.off()
 }
-
-
-
-# ### Disinfection removal 
-# pctrmv.cl <- select(filt.cec, PctRmvChlor1, PctRmvChlor2) %>%
-#   gather(key = "Phase", value = "PercentRemoval") %>%
-#   mutate(Phase = ifelse(Phase == "PctRmvChlor1", "1", 
-#                         ifelse(Phase == "PctRmvChlor2", "2", NA)))
-# 
-# p2 <- ggplot(data = filter(pctrmv.cl), aes(x=Phase, y=PercentRemoval)) +
-#   geom_boxplot() +
-#   ylab("Percent Removal") +
-#   ylim(-50, 100) +
-#   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-#   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.5, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
-#   mytheme 
-# tiff(filename = str_c(figure.dir, "CECs_pctrmv_cl", ".tiff"),
-#      height = 12, width = 17, units = 'cm',
-#      compression = "lzw", res = fig.resolution)
-# print(p2)
-# dev.off()
-# 
-# ### Total removal 
-# pctrmv.tot <- select(filt.cec, PctRmvTotal1, PctRmvTotal2) %>%
-#   gather(key = "Phase", value = "PercentRemoval") %>%
-#   mutate(Phase = ifelse(Phase == "PctRmvTotal1", "1", 
-#                         ifelse(Phase == "PctRmvTotal2", "2", NA)))
-# 
-# p3 <- ggplot(data = filter(pctrmv.tot), aes(x=Phase, y=PercentRemoval)) +
-#   geom_boxplot() +
-#   ylab("Percent Removal") +
-#   ylim(-50, 100) +
-#   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-#   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.5, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
-#   mytheme 
-# tiff(filename = str_c(figure.dir, "CECs_pctrmv_total", ".tiff"),
-#      height = 12, width = 17, units = 'cm',
-#      compression = "lzw", res = fig.resolution)
-# print(p3)
-# dev.off()
-# 
-# ## Pathogens and turbidity
-# filt.cryp <- filter(all.df, Parameter == "Cryptosporidium") %>% ungroup()
-# filt.giar <- filter(all.df, Parameter == "Giardia") %>% ungroup()
-# filt.turb <- filter(all.df, Parameter == "Turbidity") %>% ungroup()
-# 
-# ### Filter removal
-# #### Cryptosporidium
-# pctrmv.cryp <- select(filt.cryp, PctRmvTBFilt, PctRmvSMFilt, PctRmvDBFilt) %>%
-#   gather(key = "FilterType", value = "PercentRemoval") %>%
-#   mutate(FilterType = ifelse(FilterType == "PctRmvTBFilt", "TBF", 
-#                              ifelse(FilterType == "PctRmvSMFilt", "SMF", 
-#                                     ifelse(FilterType == "PctRmvDBFilt", "DBF", NA))))
-# 
-# #### specify order of filter types for boxplots
-# pctrmv.cryp$FilterType <- factor(pctrmv.cryp$FilterType,
-#                                  levels = c("SMF", "TBF", "DBF"), ordered = TRUE)
-# 
-# 
-# 
-# p4 <- ggplot(data = filter(pctrmv.cryp), aes(x=FilterType, y=PercentRemoval)) +
-#   geom_boxplot() +
-#   ylab("Percent Removal") +
-#   xlab("Filter Type") +
-#   ylim(-50, 100) +
-#   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-#   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
-#   mytheme +
-#   ggtitle("Cryptosporidium")
-# tiff(filename = str_c(figure.dir, "crypto_filter", ".tiff"),
-#      height = 12, width = 17, units = 'cm',
-#      compression = "lzw", res = fig.resolution)
-# print(p4)
-# dev.off()
-# 
-# #### Giardia
-# pctrmv.giar <- select(filt.giar, PctRmvTBFilt, PctRmvSMFilt, PctRmvDBFilt) %>%
-#   gather(key = "FilterType", value = "PercentRemoval") %>%
-#   mutate(FilterType = ifelse(FilterType == "PctRmvTBFilt", "TBF", 
-#                              ifelse(FilterType == "PctRmvSMFilt", "SMF", 
-#                                     ifelse(FilterType == "PctRmvDBFilt", "DBF", NA))))
-# 
-# #### specify order of filter types for boxplots
-# pctrmv.giar$FilterType <- factor(pctrmv.giar$FilterType,
-#                                  levels = c("SMF", "TBF", "DBF"), ordered = TRUE)
-# 
-# p5 <- ggplot(data = filter(pctrmv.giar), aes(x=FilterType, y=PercentRemoval)) +
-#   geom_boxplot() +
-#   ylab("Percent Removal") +
-#   xlab("Filter Type") +
-#   ylim(-50, 100) +
-#   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-#   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
-#   mytheme +
-#   ggtitle("Giardia")
-# tiff(filename = str_c(figure.dir, "giar_filter", ".tiff"),
-#      height = 12, width = 17, units = 'cm',
-#      compression = "lzw", res = fig.resolution)
-# print(p5)
-# dev.off()
-# 
-# #### Turbidity
-# pctrmv.turb <- select(filt.turb, PctRmvTBFilt, PctRmvSMFilt, PctRmvDBFilt) %>%
-#   gather(key = "FilterType", value = "PercentRemoval") %>%
-#   mutate(FilterType = ifelse(FilterType == "PctRmvTBFilt", "TBF", 
-#                              ifelse(FilterType == "PctRmvSMFilt", "SMF", 
-#                                     ifelse(FilterType == "PctRmvDBFilt", "DBF", NA))))
-# 
-# #### specify order of filter types for boxplots
-# pctrmv.turb$FilterType <- factor(pctrmv.turb$FilterType,
-#                                  levels = c("SMF", "TBF", "DBF"), ordered = TRUE)
-# 
-# p6 <- ggplot(data = filter(pctrmv.turb), aes(x=FilterType, y=PercentRemoval)) +
-#   geom_boxplot() +
-#   ylab("Percent Removal") +
-#   xlab("Filter Type") +
-#   ylim(-50, 100) +
-#   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-#   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
-#   mytheme +
-#   ggtitle("Turbidity")
-# tiff(filename = str_c(figure.dir, "turb_filter", ".tiff"),
-#      height = 12, width = 17, units = 'cm',
-#      compression = "lzw", res = fig.resolution)
-# print(p6)
-# dev.off()
-# 
-# ## empty plot
-# 
-# p7 <- ggplot(data = filter(pctrmv.df), aes(x=FilterType, y=PercentRemoval)) +
-#   # geom_boxplot() +
-#   ylab("Percent Removal") +
-#   xlab("Filter Type") +
-#   ylim(-50, 100) +
-#   # geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
-#   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
-#   mytheme 
-# tiff(filename = str_c(figure.dir, "empty_CECs_pctrmv", ".tiff"),
-#      height = 12, width = 17, units = 'cm',
-#      compression = "lzw", res = fig.resolution)
-# print(p7)
-# dev.off()
-
-

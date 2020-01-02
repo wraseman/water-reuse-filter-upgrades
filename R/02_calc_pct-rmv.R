@@ -41,7 +41,7 @@ all.df <- read_rds(path = data.path)
 # create dataframe for TBF and SMF analysis (i.e., Phase 1)
 tsf.df <- filter(all.df, Location %in% c("TBF-I", "TBF-E", "SMF-E", "Final Ph1"), 
                  Parameter != "Flow") %>%
-select(-DateTimeCollected, -Detect)
+  select(-DateTimeCollected, -Detect)
 
 ## get mean value for all triplicates
 ## source: https://stackoverflow.com/questions/31215795/removing-duplicate-rows-and-calculate-the-average-in-a-dataframe-in-r

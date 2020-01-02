@@ -42,8 +42,8 @@ for (i in 1:length(excel.array)){
 
 ## select only the columns that are needed and remove whitespace from column names
 selected.cols <- c("Sample ID", "Sample Date", "Sample Time", 
-                      "Analyte", "Result", "Detection Limit", 
-                      "Units", "Dilution", "QC Name")
+                   "Analyte", "Result", "Detection Limit", 
+                   "Units", "Dilution", "QC Name")
 ca.df2 <- select(ca.df1, selected.cols)
 cols.no.spaces <- str_replace_all(selected.cols, " ", "")
 colnames(ca.df2) <- cols.no.spaces
@@ -54,7 +54,7 @@ nondetect.index <- ca.df3$Result=="ND"
 ca.df3$Result[nondetect.index] <- NA
 
 ca.df3 <- mutate(ca.df3, Result = as.numeric(Result))  # convert Result to numeric
-  
+
 ## combine date and time information into a single datetime column
 ca.df4 <- mutate(ca.df3, SampleTime = hms::as_hms(SampleTime)) %>%
   mutate(SampleDateTime = as.POSIXct(str_c(SampleDate, SampleTime), format="%Y-%m-%d %H:%M:%S")) %>%
@@ -73,7 +73,7 @@ id.corrections <- c("3885588", "3421086", "3421087")
 ca.df5 <- mutate(ca.df4, SampleID = if_else(SampleID==id.errors[1], id.corrections[1],
                                             if_else(SampleID==id.errors[2], id.corrections[2],
                                                     if_else(SampleID==id.errors[3], id.corrections[3],
-                                              SampleID))))
+                                                            SampleID))))
 
 ### check that Sample IDs are correct
 #### for all 7 digit Sample IDs, check that they match the Sample ID key options
@@ -104,7 +104,7 @@ ca.df6 <- ca.df5 %>%
   mutate(LocationProcessType = str_sub(ClientID, 1, 5))  %>%  # extract location from Client ID
   filter(is.na(QCName))  %>% # remove quality control data except for laboratory trip blanks (LTB)
   select(-QCName)
-  
+
 ## get location and filter type
 influents <- c("TBF-I", "DBF-I")
 effluents <- c("TBF-E", "SMF-E", "Final", "DBF-E")
