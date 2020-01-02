@@ -24,13 +24,13 @@ for (analyte in analytes) {
   for (process in filters) {
     # analyte <- analytes[1]
     # process <- filters[1]
-
+    
     process.dir <- str_c(process, "/")  # directory based on treatment process type
-
+    
     temp.df1 <- filter(df1,
                        Analyte == analyte,
                        Process == process)
-
+    
     p1 <- ggplot(temp.df1, aes(x = SampleDate, y = PctRmvFilt)) +
       geom_hline(yintercept = 0, linetype = 2) +
       geom_col(aes(fill = as.factor(PctRmvFilt_Sign)), position = "dodge") +
@@ -38,7 +38,6 @@ for (analyte in analytes) {
       geom_label(aes(label = round(PctRmvFilt, digits = 1))) +
       ylab("Removal (%)") +
       xlab("Date") +
-
       ggtitle(analyte)
     
     ## save plot as .tiff
