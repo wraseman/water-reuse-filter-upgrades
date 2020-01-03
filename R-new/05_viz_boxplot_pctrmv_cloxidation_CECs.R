@@ -28,7 +28,7 @@ df1$ClOxidation <- factor(df1$ClOxidation,
 
 ## define figure properties
 fig.dir <- "./figures/combined-lab-results/"  # figure directory for California laboratory results
-pctrmv.dir <- "pctrmv-v-time/"
+pctrmv.dir <- "pctrmv_boxplots/"
 fig.resolution <- 300  # figure resolution (300 dpi)
 subtitle.zoom <- "(negative outliers removed for readability)"
 mytheme = theme(
@@ -61,7 +61,7 @@ p1 <- ggplot(df2, aes(x=Process, y=PctRmvClOx)) +
   mytheme 
 
 ### save plot as .tiff
-tiff.name1 <- str_c("summary_boxplot_pctrmv-v-time_clox_CECs.tiff")
+tiff.name1 <- str_c("summary_pctrmv_boxplots_clox_CECs.tiff")
 tiff.path1 <- str_c(fig.dir, tiff.name1)
 tiff(filename = tiff.path1,
      height = 12, width = 17, units = 'cm',
@@ -98,7 +98,7 @@ for (process in filters) {
     mytheme 
   
   ### save plot as .tiff
-  tiff.name3 <- str_c("boxplot_pctrmv-v-time_clox_by_cloxcategory.tiff")
+  tiff.name3 <- str_c("pctrmv_boxplots_clox_by_cloxcategory.tiff")
   tiff.path3 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name3)
   tiff(filename = tiff.path3,
        height = 12, width = 17, units = 'cm',
@@ -111,7 +111,7 @@ for (process in filters) {
     ylim(-50, 100) +
     labs(subtitle = subtitle.zoom)
   
-  tiff.name4 <- str_c("boxplot_pctrmv-v-time_clox_by_cloxcategory_zoomed.tiff")
+  tiff.name4 <- str_c("pctrmv_boxplots_clox_by_cloxcategory_zoomed.tiff")
   tiff.path4 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name4)
   tiff(filename = tiff.path4,
        height = 12, width = 17, units = 'cm',

@@ -23,7 +23,7 @@ filters <- c("TBF", "SMF", "DBF")
 
 ## define figure properties
 fig.dir <- "./figures/combined-lab-results/"  # figure directory for California laboratory results
-pctrmv.dir <- "pctrmv-v-time/"
+pctrmv.dir <- "pctrmv_boxplots/"
 fig.resolution <- 300  # figure resolution (300 dpi)
 subtitle.zoom <- "(negative outliers removed for readability)"
 mytheme = theme(
@@ -56,7 +56,7 @@ p1 <- ggplot(df2, aes(x=Process, y=PctRmvFilt)) +
   mytheme 
 
 ### save plot as .tiff
-tiff.name1 <- str_c("summary_boxplot_pctrmv-v-time_filtration_CECs.tiff")
+tiff.name1 <- str_c("summary_pctrmv-boxplot_filtration_CECs.tiff")
 tiff.path1 <- str_c(fig.dir, tiff.name1)
 tiff(filename = tiff.path1,
      height = 12, width = 17, units = 'cm',
@@ -71,7 +71,7 @@ p2 <- p1 +
   labs(subtitle = subtitle.zoom)
 
 ### save plot as .tiff
-tiff.name2 <- str_c("summary_boxplot_pctrmv-v-time_filtration_CECs_zoomed.tiff")
+tiff.name2 <- str_c("summary_pctrmv-boxplot_filtration_CECs_zoomed.tiff")
 tiff.path2 <- str_c(fig.dir, tiff.name2)
 tiff(filename = tiff.path2,
      height = 12, width = 17, units = 'cm',
@@ -94,7 +94,7 @@ for (process in filters) {
     mytheme 
   
   ### save plot as .tiff
-  tiff.name3 <- str_c("boxplot_pctrmv-v-time_filtration_by_sorption.tiff")
+  tiff.name3 <- str_c("pctrmv-boxplot_filtration_by_sorption.tiff")
   tiff.path3 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name3)
   tiff(filename = tiff.path3,
        height = 12, width = 17, units = 'cm',
@@ -107,7 +107,7 @@ for (process in filters) {
     ylim(-50, 100) +
     labs(subtitle = subtitle.zoom)
   
-  tiff.name4 <- str_c("boxplot_pctrmv-v-time_filtration_by_sorption_zoomed.tiff")
+  tiff.name4 <- str_c("pctrmv-boxplot_filtration_by_sorption_zoomed.tiff")
   tiff.path4 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name4)
   tiff(filename = tiff.path4,
        height = 12, width = 17, units = 'cm',
@@ -131,7 +131,7 @@ for (process in filters) {
     mytheme 
   
   ### save plot as .tiff
-  tiff.name5 <- str_c("boxplot_pctrmv-v-time_filtration_by_biodeg.tiff")
+  tiff.name5 <- str_c("pctrmv-boxplot_filtration_by_biodeg.tiff")
   tiff.path5 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name5)
   tiff(filename = tiff.path5,
        height = 12, width = 17, units = 'cm',
@@ -179,7 +179,7 @@ for (process in filters) {
     theme(legend.position="none")
   
   ### save plot as .tiff
-  tiff.name7 <- str_c("boxplot_pctrmv-v-time_filtration_by_biodeg-sorption.tiff")
+  tiff.name7 <- str_c("pctrmv-boxplot_filtration_by_biodeg-sorption.tiff")
   tiff.path7 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name7)
   tiff(filename = tiff.path7,
        height = 12, width = 17, units = 'cm',
@@ -193,7 +193,7 @@ for (process in filters) {
     labs(subtitle = subtitle.zoom)
   
   ### save plot as .tiff
-  tiff.name8 <- str_c("boxplot_pctrmv-v-time_filtration_by_biodeg-sorption_zoomed.tiff")
+  tiff.name8 <- str_c("pctrmv-boxplot_filtration_by_biodeg-sorption_zoomed.tiff")
   tiff.path8 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name8)
   tiff(filename = tiff.path8,
        height = 12, width = 17, units = 'cm',

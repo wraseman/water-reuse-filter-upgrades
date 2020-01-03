@@ -25,5 +25,7 @@ source("./R-new/04_calc_pctrmv_filtration.R")
 # step 5 - visualize percent removal data
 source("./R-new/05_viz_boxplot_pctrmv_cloxidation_CECs.R")
 source("./R-new/05_viz_boxplot_pctrmv_filtration_CECs.R")
+## results: see ./figures/combined-lab-results/*/pctrmv-
+source("./R-new/05_viz_boxplot_pctrmv_filtration_pathogens.R")
 ## results: see ./figures/combined-lab-results/
 source("./R-new/05_viz_pctrmv-v-time_filtration.R")
