@@ -24,7 +24,7 @@ fig.resolution <- 300  # figure resolution (300 dpi)
 
 for (analyte in analytes) {
   for (process in filters) {
-# analyte <- analytes[1]
+# analyte <- analytes[6]
 # process <- filters[1]
 
   process.dir <- str_c(process, "/")  # directory based on treatment process type

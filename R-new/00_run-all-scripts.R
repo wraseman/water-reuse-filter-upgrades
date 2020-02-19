@@ -4,6 +4,24 @@
 # clear environment
 rm(list = ls())
 
+# remove figures from previous runs
+fig.dir <- "./figures/combined-lab-results/"
+unlink(str_c(fig.dir, "*"))
+
+filters <- c("DBF", "SMF", "SMF+TBF", "TBF")
+for (filter in filters) {
+  
+  # remove figures from filter directories
+  filt.dir <- str_c(fig.dir, filter, "/")
+  unlink(str_c(filt.dir, "*"))
+  
+  # remove figures from filter subdirectories
+  unlink(str_c(filt.dir, "concentration-v-time/*"))
+  unlink(str_c(filt.dir, "detect-nondetect_bar-plots/*"))
+  unlink(str_c(filt.dir, "pctrmv_boxplots/*"))
+  unlink(str_c(filt.dir, "pctrmv-v-time/*"))
+}
+
 # step 1 - read in laboratory data
 source("./R-new/01_read-clean_ca-labs.R")
 source("./R-new/01_read-clean_sb-labs.R")
@@ -18,12 +36,12 @@ source("./R-new/03_viz_conc-v-time_detect-v-nondetect.R")
 ## results: see ./figures/combined-lab-results/*/detect-nondetect_bar-plots and
 ##  ./figures/combined-lab-results/*/concentration-v-time/ for visualizations 
 
-# step 4 - calculate percent removal of analytes due to filtration and chlorine oxidation
-source("./R-new/04_calc_pctrmv_cloxidation.R")
+# step 4 - calculate percent removal of analytes due to filtration and Chloramine Oxidation
+source("./R-new/04_calc_pctrmv_chloramineoxidation.R")
 source("./R-new/04_calc_pctrmv_filtration.R")
 
 # step 5 - visualize percent removal data
-source("./R-new/05_viz_boxplot_pctrmv_cloxidation_CECs.R")
+source("./R-new/05_viz_boxplot_pctrmv_chloramineoxidation_CECs.R")
 source("./R-new/05_viz_boxplot_pctrmv_filtration_CECs.R")
 ## results: see ./figures/combined-lab-results/*/pctrmv-
 source("./R-new/05_viz_boxplot_pctrmv_filtration_pathogens.R")

@@ -13,6 +13,7 @@ library(readxl)  # read Excel spreadsheets
 # read in data from lab samples tested in Eurofin's South Bend lab
 ef.dir <- "./data/eurofins-data/"
 sb.dir <- str_c(ef.dir, "southbend-lab-results/")
+rmvcat.dir <- "./removal categories/"
 
 ## read in all South Bend spreadsheets at once
 ## source: https://rpubs.com/LMunyan/363306
@@ -22,7 +23,7 @@ excel.array <- str_subset(file.array, "xlsx") %>%  # only include Excel spreadsh
 
 sb.df1 <- data.frame()  # empty dataframe for California data
 
-# read in data 
+# read in data
 for (i in 1:length(excel.array)){
   temp.df <- read_excel(str_c(sb.dir, excel.array[i]), range = cell_cols("A:P"))
   sb.df1 <- rbind(sb.df1, temp.df)  # for each iteration, bind the new data to the building dataset
@@ -33,8 +34,8 @@ for (i in 1:length(excel.array)){
 selected.cols <- c("EEA ID#", "Client ID", "Sample Type", "Collected",
                    "Analyte", "Result Flag", "Result",
                    "Units", "MRL", "Dil Factor")
-new.colnames <- c("SampleID", "ClientID", "SampleType", "SampleDateTime", 
-                  "Analyte", "ResultFlag", "Result", 
+new.colnames <- c("SampleID", "ClientID", "SampleType", "SampleDateTime",
+                  "Analyte", "ResultFlag", "Result",
                   "Units", "DetectionLimit", "Dilution")
 sb.df2 <- select(sb.df1, selected.cols)
 colnames(sb.df2) <- new.colnames
@@ -55,20 +56,20 @@ sb.df3 <- sb.df2 %>%
 sb.df4 <- sb.df3 %>%
   mutate(LocationProcessType = str_sub(ClientID, 1, 5)) %>%
   ### specify whether it is a process influent or effluent and the process type
-  mutate(ProcessInfEff = 
+  mutate(ProcessInfEff =
            if_else(str_sub(LocationProcessType, -2, -1) == "-I", "Influent",  # check last two characters to determine if influent data
                    if_else(str_sub(LocationProcessType, -2, -1) == "-E", "Effluent",  # check last two characters to determine if effluent data
-                           if_else(LocationProcessType == "Final", "Effluent", 
+                           if_else(LocationProcessType == "Final", "Effluent",
                                    NA_character_)))) %>%
   ### determine the process type: filter (TBF, SMF, DBF), clearwell, or laboratory blank (technically not a process)
   mutate(Process = if_else(str_sub(LocationProcessType, 1, 3) == "TBF", "TBF",  # check first three characters to get unit process
                            if_else(str_sub(LocationProcessType, 1, 3) == "SMF", "SMF",
-                                   if_else(str_sub(LocationProcessType, 1, 3) == "DBF", "DBF", 
+                                   if_else(str_sub(LocationProcessType, 1, 3) == "DBF", "DBF",
                                            if_else(LocationProcessType=="Final", "clearwell",
                                                    NA_character_)))))
 
-## in the plant, the stream is bifurcated between TBF and SMF. This stream is 
-##   called "TBF-I" but it is actually the infuent for both TBF and SMF. 
+## in the plant, the stream is bifurcated between TBF and SMF. This stream is
+##   called "TBF-I" but it is actually the infuent for both TBF and SMF.
 ##   For this reason, duplicate all TBF-I to specify Process = "SMF" and ProcessInfEff = "Influent"
 smf.inf <- filter(sb.df4, Process == "TBF", ProcessInfEff == "Influent") %>%
   mutate(Process = "SMF")
@@ -80,9 +81,9 @@ sb.df5 <- bind_rows(sb.df4, smf.inf)
 ##  however, we need to add "Duplicate" and "Triplicate" columns in this dataframe
 ##  to match the structure of the California dataframe
 sb.df6 <- sb.df5 %>%
-  mutate(Duplicate = FALSE, 
+  mutate(Duplicate = FALSE,
          Triplicate = FALSE)
-  
+
 ## account for dilution factor and inconsistency in units in data
 ### multiply all "/100L" samples by 100 and convert to units of "/L"
 sb.df7 <- sb.df6 %>%
@@ -101,21 +102,26 @@ sb.df8$ProcessInfEff <- factor(sb.df8$ProcessInfEff,
 # filter data for compounds of interest
 # keep columns and analytes necessary for analysis
 analytes <- c("Cryptosporidium", "Giardia",  # pathogens
-              "Meprobamate", "Dilantin", "Sulfamethoxazole",  # CECs (all remaining strings)
-              "BPA", "TCEP", "TCPP",
-              "Carbamazepine", "Salicylic Acid",
-              "Gemfibrozil", "Ibuprofen", "Acetaminophen",
-              "Triclosan", "Caffeine", "Fluoxetine")
+               "Meprobamate", "Dilantin", "Sulfamethoxazole",
+               "TCEP", "Carbamazepine",
+               "Gemfibrozil", "Ibuprofen", "Acetaminophen",
+               "Triclosan", "Caffeine", "Fluoxetine")
+# analytes <- c("Cryptosporidium", "Giardia",  # pathogens
+#                "Meprobamate", "Dilantin", "Sulfamethoxazole",  # CECs (all remaining strings)
+#                "BPA", "TCEP", "TCPP",
+#                "Carbamazepine", "Salicylic Acid",
+#                "Gemfibrozil", "Ibuprofen", "Acetaminophen",
+#                "Triclosan", "Caffeine", "Fluoxetine")
 sb.df9 <- filter(sb.df8, Analyte %in% analytes)
 
-## assign biodegradation, sorption, and chlorine oxidation categories for each analyte
-bsc.table <- read_excel(str_c(ef.dir, "Biodeg-Sorp-ClOx_key.xlsx")) %>%
+## assign biodegradation, sorption, and chloramine oxidation categories for each analyte
+bsc.table <- read_excel(str_c(rmvcat.dir, "Biodeg-Sorp-ChloramineOx_key.xlsx")) %>%
   ### convert columns to factors
   mutate(Biodegradation = as.factor(Biodegradation),
          Sorption = as.factor(Sorption),
-         ClOxidation = as.factor(ClOxidation))
+         ChloramineOxidation = as.factor(ChloramineOxidation))
 
-sb.df10 <- left_join(sb.df9, bsc.table)  # add biodegration, sorption, and chlorine oxidation categories to dataframe
+sb.df10 <- left_join(sb.df9, bsc.table)  # add biodegration, sorption, and Chloramine Oxidation categories to dataframe
 
 # save cleaned data
 clean.path <- str_c(ef.dir, "clean/", "southbend-lab-results_clean.rds")

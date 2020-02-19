@@ -13,6 +13,7 @@ library(readxl)  # read Excel spreadsheets
 # read in data from lab samples tested in Eurofin's California lab
 ef.dir <- "./data/eurofins-data/"
 ca.dir <- str_c(ef.dir, "california-lab-results/")
+rmvcat.dir <- "./removal categories/"
 
 ## read in all California spreadsheets at once
 ## source: https://rpubs.com/LMunyan/363306
@@ -24,11 +25,11 @@ excel.array <- str_subset(file.array, "xlsx") %>%  # only include Excel spreadsh
 ca.df1 <- data.frame()  # empty dataframe for California data
 
 ## read in data with specified columns
-col.types <- c("numeric", "text", "text", "numeric", "numeric", "text", "text", 
-               "numeric", "numeric", "date", "date", "date",	"date",	
-               "text",	"text",	"text",	"text",	"text",	"text",	
-               "numeric", 	"text",	"text",	"numeric",	"numeric",	
-               "numeric",	"numeric",	"numeric",	"numeric",	"numeric", 	
+col.types <- c("numeric", "text", "text", "numeric", "numeric", "text", "text",
+               "numeric", "numeric", "date", "date", "date",	"date",
+               "text",	"text",	"text",	"text",	"text",	"text",
+               "numeric", 	"text",	"text",	"numeric",	"numeric",
+               "numeric",	"numeric",	"numeric",	"numeric",	"numeric",
                "text",	"text",	"text",	"text",	"text",	"text")  # specify column types
 
 # ca.df1 <- read_excel(str_c(ca.dir, excel.array[9]), range = cell_cols("A:AI"),
@@ -41,8 +42,8 @@ for (i in 1:length(excel.array)){
 }
 
 ## select only the columns that are needed and remove whitespace from column names
-selected.cols <- c("Sample ID", "Sample Date", "Sample Time", 
-                   "Analyte", "Result", "Detection Limit", 
+selected.cols <- c("Sample ID", "Sample Date", "Sample Time",
+                   "Analyte", "Result", "Detection Limit",
                    "Units", "Dilution", "QC Name")
 ca.df2 <- select(ca.df1, selected.cols)
 cols.no.spaces <- str_replace_all(selected.cols, " ", "")
@@ -85,10 +86,10 @@ check.ids <- (ids.7dig %in% id.df$SampleID) %>%
   all(TRUE)  # confirmed that all 7 digit Sample ID now match those in the key table
 
 ### add sample location (raw data) using Sample ID key
-ca.df5 <- left_join(ca.df5, id.df)  
+ca.df5 <- left_join(ca.df5, id.df)
 
 ## identify duplicate and triplicate samples and extract location
-duplicates <- c("Final-2", "DBF-E-2", "DBF-I-2", 
+duplicates <- c("Final-2", "DBF-E-2", "DBF-I-2",
                 "TBF-I Dup Week 2",
                 "TBF-E Dup Week 2",
                 "SMF-E Week 2 Dup",
@@ -117,26 +118,26 @@ dbf <- c("DBF-I", "DBF-E")  # deep bed filtration
 ## unpack LocationProcessType to extract whether location is influent/effluent and what the unit process is
 ca.df7 <- ca.df6 %>%
   ### specify whether it is a process influent or effluent and the process type
-  mutate(ProcessInfEff = 
-                   if_else(LocationProcessType %in% influents, "Influent", 
-                           if_else(LocationProcessType %in% effluents, "Effluent", 
+  mutate(ProcessInfEff =
+                   if_else(LocationProcessType %in% influents, "Influent",
+                           if_else(LocationProcessType %in% effluents, "Effluent",
                                    NA_character_))) %>%
   ### determine the process type: filter (TBF, SMF, DBF), clearwell, or laboratory blank (technically not a process)
   mutate(Process = if_else(LocationProcessType %in% tbf, "TBF",
                             if_else(LocationProcessType %in% smf, "SMF",
-                                    if_else(LocationProcessType %in% dbf, "DBF", 
+                                    if_else(LocationProcessType %in% dbf, "DBF",
                                             if_else(LocationProcessType %in% clearwell, "clearwell",
                                                     if_else(LocationProcessType %in% blank, "lab_blank",
                                                             NA_character_))))))
-## in the plant, the stream is bifurcated between TBF and SMF. This stream is 
-##   called "TBF-I" but it is actually the infuent for both TBF and SMF. 
+## in the plant, the stream is bifurcated between TBF and SMF. This stream is
+##   called "TBF-I" but it is actually the infuent for both TBF and SMF.
 ##   For this reason, duplicate all TBF-I to specify Process = "SMF" and ProcessInfEff = "Influent"
 smf.inf <- filter(ca.df7, Process == "TBF", ProcessInfEff == "Influent") %>%
   mutate(Process = "SMF")
 
 ## add duplicated observations for TBF-I
 ca.df7 <- bind_rows(ca.df7, smf.inf)
-  
+
 ### LocationProcessType matrix
 ## TBF-I - ProcessInfEff = Influent, Process = TBF
 ## TBF-I - ProcessInfEff = Influent, Process = SMF (note that this is a special case)
@@ -156,26 +157,30 @@ ca.df8$ProcessInfEff <- factor(ca.df8$ProcessInfEff,
 
 ## filter data for compounds of interest
 ## keep columns and analytes necessary for analysis
-analytes <- c("Meprobamate", "Dilantin", "Sulfamethoxazole", 
-              "BPA", "TCEP", "TCPP",
-              "Carbamazepine", "Salicylic Acid", 
-              "Gemfibrozil", "Ibuprofen", "Acetaminophen",
-              "Triclosan", "Caffeine", "Fluoxetine")
+analytes <- c("Meprobamate", "Dilantin", "Sulfamethoxazole",
+               "TCEP", "Carbamazepine",
+               "Gemfibrozil", "Ibuprofen", "Acetaminophen",
+               "Triclosan", "Caffeine", "Fluoxetine")
+# analytes <- c("Meprobamate", "Dilantin", "Sulfamethoxazole",
+#               "BPA", "TCEP", "TCPP",
+#               "Carbamazepine", "Salicylic Acid",
+#               "Gemfibrozil", "Ibuprofen", "Acetaminophen",
+#               "Triclosan", "Caffeine", "Fluoxetine")
 ca.df9 <- filter(ca.df8, Analyte %in% analytes)
 
 ### compare analyte names in lab data and analytes array
-matching.analytes <- (analytes %in% ca.df8$Analyte) 
+matching.analytes <- (analytes %in% ca.df8$Analyte)
 mismatched <- analytes[matching.analytes==FALSE]
 check.analytes <- all(matching.analytes, TRUE)
 
-## assign biodegradation, sorption, and chlorine oxidation categories for each analyte
-bsc.table <- read_excel(str_c(ef.dir, "Biodeg-Sorp-ClOx_key.xlsx")) %>%
+## assign biodegradation, sorption, and chloramine oxidation categories for each analyte
+bsc.table <- read_excel(str_c(rmvcat.dir, "Biodeg-Sorp-ChloramineOx_key.xlsx")) %>%
   ### convert columns to factors
-  mutate(Biodegradation = as.factor(Biodegradation), 
-         Sorption = as.factor(Sorption), 
-         ClOxidation = as.factor(ClOxidation))
+  mutate(Biodegradation = as.factor(Biodegradation),
+         Sorption = as.factor(Sorption),
+         ChloramineOxidation = as.factor(ChloramineOxidation))
 
-ca.df10 <- left_join(ca.df9, bsc.table)  # add biodegration, sorption, and chlorine oxidation categories to dataframe
+ca.df10 <- left_join(ca.df9, bsc.table)  # add biodegration, sorption, and Chloramine Oxidation categories to dataframe
 
 ## removed redundant rows in the data
 ### note: this is NOT removing data from the triplicate analysis, it is removing

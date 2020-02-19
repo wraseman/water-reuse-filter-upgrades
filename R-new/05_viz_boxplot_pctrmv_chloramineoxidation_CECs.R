@@ -1,4 +1,4 @@
-# purpose: create boxplots of percent removal of CECs due to chlorine oxidation
+# purpose: create boxplots of percent removal of CECs due to Chloramine Oxidation
 # author: Billy Raseman
 
 # clear environment
@@ -14,17 +14,17 @@ library(readxl)  # read Excel spreadsheets
 
 # read in percent removal data
 calc.dir <- "./data/eurofins-data/calculated/"
-pctrmv.path <- str_c(calc.dir, "pctrmv-cloxidation.rds")
+pctrmv.path <- str_c(calc.dir, "pctrmv-chloramineoxidation.rds")
 df1 <- read_rds(path = pctrmv.path) %>%
   filter(!(Analyte %in% c("Cryptosporidium", "Giardia"))) %>%
-  filter(Analyte != "BPA")  # no Chlorine Oxidation category for BPA
+  filter(Analyte != "BPA")  # no Chloramine Oxidation category for BPA
 
 analytes <- df1$Analyte %>% unique
 filters <- c("SMF+TBF", "DBF")
 
-## reverse order of factors for Chlorine Oxidation
-df1$ClOxidation <- factor(df1$ClOxidation, 
-                   levels=levels(df1$ClOxidation)[order(levels(df1$ClOxidation), decreasing = TRUE)])
+## reverse order of factors for Chloramine Oxidation
+df1$ChloramineOxidation <- factor(df1$ChloramineOxidation, 
+                                  levels=levels(df1$ChloramineOxidation)[order(levels(df1$ChloramineOxidation), decreasing = TRUE)])
 
 ## define figure properties
 fig.dir <- "./figures/combined-lab-results/"  # figure directory for California laboratory results
@@ -52,16 +52,16 @@ names(filter.fullnames) <- filters  # abbreviations
 
 # plot percent removal by filter type 
 ## plots with full extent of removal data
-p1 <- ggplot(df2, aes(x=Process, y=PctRmvClOx)) +
+p1 <- ggplot(df2, aes(x=Process, y=PctRmvChlormaineOx)) +
   geom_boxplot() +
-  ylab("Removal by Chlorine Oxidation (%)") +
+  ylab("Removal by Chloramine Oxidation (%)") +
   xlab("Filter Type") +
   geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
   # stat_summary(fun.data=medianboxplt, geom="text", vjust=-0.25, col="black", size=6) +  # source: https://stackoverflow.com/questions/31138970/plot-number-of-data-points-in-r
   mytheme 
 
 ### save plot as .tiff
-tiff.name1 <- str_c("summary_pctrmv_boxplots_clox_CECs.tiff")
+tiff.name1 <- str_c("summary_pctrmv_boxplots_ChlormaineOx_CECs.tiff")
 tiff.path1 <- str_c(fig.dir, tiff.name1)
 tiff(filename = tiff.path1,
      height = 12, width = 17, units = 'cm',
@@ -75,7 +75,7 @@ p2 <- p1 +
   labs(subtitle = subtitle.zoom)
 
 ### save plot as .tiff
-tiff.name2 <- str_c("summary_boxplot_pctrmv-v-time_clox_CECs_zoomed.tiff")
+tiff.name2 <- str_c("summary_boxplot_pctrmv-v-time_ChlormaineOx_CECs_zoomed.tiff")
 tiff.path2 <- str_c(fig.dir, tiff.name2)
 tiff(filename = tiff.path2,
      height = 12, width = 17, units = 'cm',
@@ -83,22 +83,22 @@ tiff(filename = tiff.path2,
 print(p2)
 dev.off()
 
-# plot percent removal for each filter by chlorine oxidation category
+# plot percent removal for each filter by Chloramine Oxidation category
 for (process in filters) {
-
+  
   temp.df2 <- filter(df2, Process == process)  # create temporary dataframe that only includes a single filter type
-
+  
   ## plot with full extent of removal data
-  p3 <- ggplot(temp.df2, aes(x=ClOxidation, y=PctRmvClOx)) +
-    geom_boxplot(aes(fill = ClOxidation), alpha = 0.7) +
-    ylab("Removal by Chlorine Oxidation (%)") +
-    xlab("Chlorine Oxidation Category") +
+  p3 <- ggplot(temp.df2, aes(x=ChloramineOxidation, y=PctRmvChlormaineOx)) +
+    geom_boxplot(aes(fill = ChloramineOxidation), alpha = 0.7) +
+    ylab("Removal by Chloramine Oxidation (%)") +
+    xlab("Chloramine Oxidation Category") +
     geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
     ggtitle(process) +
     mytheme 
   
   ### save plot as .tiff
-  tiff.name3 <- str_c("pctrmv_boxplots_clox_by_cloxcategory.tiff")
+  tiff.name3 <- str_c("pctrmv_boxplots_ChlormaineOx_by_ChlormaineOxcategory.tiff")
   tiff.path3 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name3)
   tiff(filename = tiff.path3,
        height = 12, width = 17, units = 'cm',
@@ -111,7 +111,7 @@ for (process in filters) {
     ylim(-50, 100) +
     labs(subtitle = subtitle.zoom)
   
-  tiff.name4 <- str_c("pctrmv_boxplots_clox_by_cloxcategory_zoomed.tiff")
+  tiff.name4 <- str_c("pctrmv_boxplots_ChlormaineOx_by_ChlormaineOxcategory_zoomed.tiff")
   tiff.path4 <- str_c(fig.dir, process, "/", pctrmv.dir, tiff.name4)
   tiff(filename = tiff.path4,
        height = 12, width = 17, units = 'cm',
@@ -120,24 +120,27 @@ for (process in filters) {
   dev.off()
 }
 
-# plot triclosan (it seems to have high removal)
+# plot "Good Chlorine Oxidation": triclosan (it seems to have high removal) and acetaminophen
 detect.bool.fill <- c("SMF+TBF" = "#bcbddc", "DBF" = "#756bb1") ## assign color scale for detects/non-detects. source: http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
-df3 <- filter(df2, Analyte == "Triclosan") %>%
-  ungroup
-
-p5 <- ggplot(df3, aes(x = PctRmvClOx)) +
-  geom_histogram(binwidth = 5, aes(fill = Process)) +
-  scale_fill_manual(values = detect.bool.fill) + 
-  xlab("Removal by Chlorine Oxidation (%)") +
-  ylab("Number of Samples") +
-  ggtitle("Triclosan") +
-  mytheme
-
-tiff.name5 <- str_c("Triclosan_hist_pctrmv_by_clox.tiff")
-tiff.path5 <- str_c(fig.dir, tiff.name5)
-tiff(filename = tiff.path5,
-     height = 12, width = 17, units = 'cm',
-     compression = "lzw", res = fig.resolution)
-print(p5)
-dev.off()
+goodox.analytes <- c("Acetaminophen", "Triclosan")
+for (analyte in goodox.analytes) {
+  df3 <- filter(df2, Analyte == analyte) %>%
+    ungroup
   
+  p5 <- ggplot(df3, aes(x = PctRmvChlormaineOx)) +
+    geom_histogram(binwidth = 5, aes(fill = Process)) +
+    scale_fill_manual(values = detect.bool.fill) + 
+    xlab("Removal by Chloramine Oxidation (%)") +
+    ylab("Number of Samples") +
+    ggtitle(analyte) +
+    mytheme
+  
+  tiff.name5 <- str_c(analyte, "_hist_pctrmv_by_ChlormaineOx.tiff")
+  tiff.path5 <- str_c(fig.dir, tiff.name5)
+  tiff(filename = tiff.path5,
+       height = 12, width = 17, units = 'cm',
+       compression = "lzw", res = fig.resolution)
+  print(p5)
+  dev.off()
+}
+

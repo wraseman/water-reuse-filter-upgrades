@@ -1,4 +1,4 @@
-# purpose: create dataset for percent removal of CECs due to chlorine oxidation
+# purpose: create dataset for percent removal of CECs due to Chloramine Oxidation
 # author: Billy Raseman
 
 # clear environment
@@ -19,7 +19,7 @@ df2 <- df1 %>%
          Triplicate == FALSE) %>%  # remove extra values from triplicate analysis
   filter(Process != "lab_blank") %>%
   mutate(SampleDate = lubridate::floor_date(SampleDateTime, unit = "6 hours")) %>%  # round datetime to nearest 6 hours
-  select(Analyte, SampleDate, Process, DilutAndLimAdjResult, ProcessInfEff, ClOxidation)
+  select(Analyte, SampleDate, Process, DilutAndLimAdjResult, ProcessInfEff, ChloramineOxidation)
 
 ## create influent and effluent columns for each process type
 ##  source: https://tidyr.tidyverse.org/dev/articles/pivot.html
@@ -39,23 +39,23 @@ Q.frc.smf <- Q.smf/Q.total  # flow fraction sent to synthetic media filters
 df4 <- df3 %>%
   mutate(SMFTBF_Eff_Estimated = Q.frc.tbf*TBF_Effluent + Q.frc.smf*SMF_Effluent)
 
-## calculate percent removal due to chlorine oxidation
+## calculate percent removal due to Chloramine Oxidation
 df5 <- df4 %>%
-  mutate(PctRmvClOx_SMFTBF = ((SMFTBF_Eff_Estimated - clearwell_Effluent)/SMFTBF_Eff_Estimated) * 100) %>%
-  # PctRmvClOxSign_SMFTBF = if_else(sign(PctRmvClOx_SMFTBF) == 1, "Positive",
-  #                           if_else(sign(PctRmvClOx_SMFTBF) == 0, "Zero",
+  mutate(PctRmvChlormaineOx_SMFTBF = ((SMFTBF_Eff_Estimated - clearwell_Effluent)/SMFTBF_Eff_Estimated) * 100) %>%
+  # PctRmvChlormaineOxSign_SMFTBF = if_else(sign(PctRmvChlormaineOx_SMFTBF) == 1, "Positive",
+  #                           if_else(sign(PctRmvChlormaineOx_SMFTBF) == 0, "Zero",
   #                                   "Negative"))) %>%
-  mutate(PctRmvClOx_DBF = ((DBF_Effluent - clearwell_Effluent)/DBF_Effluent) * 100)
+  mutate(PctRmvChlormaineOx_DBF = ((DBF_Effluent - clearwell_Effluent)/DBF_Effluent) * 100)
 
 ## remove extra columns and tidy data
 df6 <- df5 %>%
-  # select(Analyte, SampleDate, ClOxidation, PctRmvClOx_SMFTBF, PctRmvClOx_DBF) %>%
-  mutate(Process = if_else(is.na(PctRmvClOx_SMFTBF), "DBF", "SMF+TBF")) %>% 
-  mutate(PctRmvClOx = if_else(is.na(PctRmvClOx_SMFTBF), PctRmvClOx_DBF, PctRmvClOx_SMFTBF)) %>%
-  select(-PctRmvClOx_SMFTBF, -PctRmvClOx_DBF)
+  # select(Analyte, SampleDate, ChloramineOx, PctRmvChlormaineOx_SMFTBF, PctRmvChlormaineOx_DBF) %>%
+  mutate(Process = if_else(is.na(PctRmvChlormaineOx_SMFTBF), "DBF", "SMF+TBF")) %>% 
+  mutate(PctRmvChlormaineOx = if_else(is.na(PctRmvChlormaineOx_SMFTBF), PctRmvChlormaineOx_DBF, PctRmvChlormaineOx_SMFTBF)) %>%
+  select(-PctRmvChlormaineOx_SMFTBF, -PctRmvChlormaineOx_DBF)
 
 # save percent removal data (categorized by )
 write.df <- df6
 ef.dir <- "./data/eurofins-data/"
-clean.path <- str_c(ef.dir, "calculated/", "pctrmv-cloxidation.rds")
+clean.path <- str_c(ef.dir, "calculated/", "pctrmv-chloramineoxidation.rds")
 write_rds(x=write.df, path=clean.path)
