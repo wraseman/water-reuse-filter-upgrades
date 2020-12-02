@@ -120,7 +120,7 @@ for (process in filters) {
   dev.off()
 }
 
-# plot "Good Chlorine Oxidation": triclosan (it seems to have high removal) and acetaminophen
+# plot "Good Chloramine Oxidation": triclosan (it seems to have high removal) and acetaminophen
 detect.bool.fill <- c("SMF+TBF" = "#bcbddc", "DBF" = "#756bb1") ## assign color scale for detects/non-detects. source: http://colorbrewer2.org/#type=sequential&scheme=BuGn&n=3
 goodox.analytes <- c("Acetaminophen", "Triclosan")
 for (analyte in goodox.analytes) {
@@ -143,4 +143,3 @@ for (analyte in goodox.analytes) {
   print(p5)
   dev.off()
 }
-

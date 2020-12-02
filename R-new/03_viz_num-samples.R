@@ -185,3 +185,9 @@ tiff(filename = tiff.path5,
 print(p5)
 dev.off()
 
+# sampling data count for paper (by Phase)
+pth.count3 <- pth.df1 %>%
+  mutate(year = lubridate::year(SampleDateTime)) %>%
+  group_by(Analyte, year) %>%
+  count()
+
