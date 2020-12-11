@@ -40,8 +40,7 @@ comb.df2 <- comb.df1 %>%
   mutate(LimitAdjResult = if_else(is.na(Result), DetectionLimit,   # if Result is "NA", set value to Detection Limit
                                   if_else(Result < DetectionLimit, DetectionLimit,  # if Result is less than Detection Limit, set to limit
                                           Result))) %>% # otherwise, keep Result the same
-  mutate(Detect = if_else(LimitAdjResult == DetectionLimit, FALSE, TRUE)) %>%  # if Result was adjusted to Detection Limit, specify that that was a non-detect
-  mutate(DilutAndLimAdjResult = LimitAdjResult * Dilution)  # adjust for dilution
+  mutate(Detect = if_else(LimitAdjResult == DetectionLimit, FALSE, TRUE))  # if Result was adjusted to Detection Limit, specify that that was a non-detect
 
 # save dataframe
 write.df <- comb.df2
