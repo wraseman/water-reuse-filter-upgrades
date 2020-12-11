@@ -13,7 +13,7 @@ library(readxl)  # read Excel spreadsheets
 # read in data from lab samples tested in Eurofin's California lab
 ef.dir <- "./data/eurofins-data/"
 ca.dir <- str_c(ef.dir, "california-lab-results/")
-rmvcat.dir <- "./removal categories/"
+config.dir <- "./config/"
 
 ## read in all California spreadsheets at once
 ## source: https://rpubs.com/LMunyan/363306
@@ -44,7 +44,7 @@ for (i in 1:length(excel.array)){
 ## select only the columns that are needed and remove whitespace from column names
 selected.cols <- c("Sample ID", "Sample Date", "Sample Time",
                    "Analyte", "Result", "Detection Limit",
-                   "Units", "Dilution", "QC Name")
+                   "Units", "QC Name")
 ca.df2 <- select(ca.df1, selected.cols)
 cols.no.spaces <- str_replace_all(selected.cols, " ", "")
 colnames(ca.df2) <- cols.no.spaces
@@ -148,11 +148,8 @@ ca.df7 <- bind_rows(ca.df7, smf.inf)
 ## DBF-I - ProcessInfEff = Influent, Process = DBF
 ## DBF-E - ProcessInfEff = Effluent, Process = DBF
 
-## account for dilution of samples
-ca.df8 <- mutate(ca.df7, DilutAdjResult = Result * Dilution)  # calculate concentration after adjusting for lab dilution
-
 ### make Process influent and effluent factors so when plotted as boxplot or barplot, influent comes before effluent
-ca.df8$ProcessInfEff <- factor(ca.df8$ProcessInfEff,
+ca.df7$ProcessInfEff <- factor(ca.df7$ProcessInfEff,
                                levels = c("Influent", "Effluent"))
 
 ## filter data for compounds of interest
@@ -166,28 +163,28 @@ analytes <- c("Meprobamate", "Dilantin", "Sulfamethoxazole",
 #               "Carbamazepine", "Salicylic Acid",
 #               "Gemfibrozil", "Ibuprofen", "Acetaminophen",
 #               "Triclosan", "Caffeine", "Fluoxetine")
-ca.df9 <- filter(ca.df8, Analyte %in% analytes)
+ca.df8 <- filter(ca.df7, Analyte %in% analytes)
 
 ### compare analyte names in lab data and analytes array
-matching.analytes <- (analytes %in% ca.df8$Analyte)
+matching.analytes <- (analytes %in% ca.df7$Analyte)
 mismatched <- analytes[matching.analytes==FALSE]
 check.analytes <- all(matching.analytes, TRUE)
 
 ## assign biodegradation, sorption, and chloramine oxidation categories for each analyte
-bsc.table <- read_excel(str_c(rmvcat.dir, "Biodeg-Sorp-ChloramineOx_key.xlsx")) %>%
+bsc.table <- read_excel(str_c(config.dir, "Biodeg-Sorp-ChloramineOx_key.xlsx")) %>%
   ### convert columns to factors
   mutate(Biodegradation = as.factor(Biodegradation),
          Sorption = as.factor(Sorption),
          ChloramineOxidation = as.factor(ChloramineOxidation))
 
-ca.df10 <- left_join(ca.df9, bsc.table)  # add biodegration, sorption, and Chloramine Oxidation categories to dataframe
+ca.df9 <- left_join(ca.df8, bsc.table)  # add biodegration, sorption, and Chloramine Oxidation categories to dataframe
 
 ## removed redundant rows in the data
 ### note: this is NOT removing data from the triplicate analysis, it is removing
 ###   samples that appear twice in the dataset
-ca.df11 <- unique(ca.df10)
+ca.df10 <- unique(ca.df9)
 
 # save cleaned data
 clean.path <- str_c(ef.dir, "clean/", "california-lab-results_clean.rds")
-write.df <- ca.df11
+write.df <- ca.df10
 write_rds(x=write.df, path=clean.path)

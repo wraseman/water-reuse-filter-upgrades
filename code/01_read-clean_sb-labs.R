@@ -1,5 +1,5 @@
 # Purpose: read in and clean data from South Bend laboratory results
-#   Data includes contaminants of emerging concern (CEC) and pathogens (Giardia and Cryptosporidium)
+#   Data includes TrOCs and pathogens (Giardia and Cryptosporidium)
 # Output: ./data/eurofins-data/clean/southbend-lab-results_clean.rds (tidy, cleaned dataframe)
 # Author: William Raseman
 
@@ -13,7 +13,7 @@ library(readxl)  # read Excel spreadsheets
 # read in data from lab samples tested in Eurofin's South Bend lab
 ef.dir <- "./data/eurofins-data/"
 sb.dir <- str_c(ef.dir, "southbend-lab-results/")
-rmvcat.dir <- "./removal categories/"
+config.dir <- "./config/"
 
 ## read in all South Bend spreadsheets at once
 ## source: https://rpubs.com/LMunyan/363306
@@ -33,10 +33,10 @@ for (i in 1:length(excel.array)){
 ## select only the columns that are needed and rename those columns for consistency with California lab analysis
 selected.cols <- c("EEA ID#", "Client ID", "Sample Type", "Collected",
                    "Analyte", "Result Flag", "Result",
-                   "Units", "MRL", "Dil Factor")
+                   "Units", "MRL")
 new.colnames <- c("SampleID", "ClientID", "SampleType", "SampleDateTime",
                   "Analyte", "ResultFlag", "Result",
-                  "Units", "DetectionLimit", "Dilution")
+                  "Units", "DetectionLimit")
 sb.df2 <- select(sb.df1, selected.cols)
 colnames(sb.df2) <- new.colnames
 
@@ -88,15 +88,11 @@ sb.df6 <- sb.df5 %>%
 ### multiply all "/100L" samples by 100 and convert to units of "/L"
 sb.df7 <- sb.df6 %>%
   mutate(Result = if_else(str_sub(Units, -5, -1) == "/100L", Result/100, Result)) %>%  # convert Result from /100L units to /L
-  mutate(Dilution = if_else(str_sub(Units, -5, -1) == "/100L", Dilution/100, Dilution)) %>%  # convert Dilution from /100L units to /L
   mutate(DetectionLimit = if_else(str_sub(Units, -5, -1) == "/100L", DetectionLimit/100, DetectionLimit)) %>%  # convert Dilution from /100L units to /L
   mutate(Units = if_else(str_sub(Units, -5, -1) == "/100L", str_replace(Units, "/100L", "/L"), Units))  # convert units from /100L to /L
 
-### multiply by dilution factor
-sb.df8 <- mutate(sb.df7, DilutAdjResult = Result * Dilution)  # calculate concentration after adjusting for lab dilution
-
 ### make Process influent and effluent factors so when plotted as boxplot or barplot, influent comes before effluent
-sb.df8$ProcessInfEff <- factor(sb.df8$ProcessInfEff,
+sb.df7$ProcessInfEff <- factor(sb.df7$ProcessInfEff,
                                levels = c("Influent", "Effluent"))
 
 # filter data for compounds of interest
@@ -112,18 +108,18 @@ analytes <- c("Cryptosporidium", "Giardia",  # pathogens
 #                "Carbamazepine", "Salicylic Acid",
 #                "Gemfibrozil", "Ibuprofen", "Acetaminophen",
 #                "Triclosan", "Caffeine", "Fluoxetine")
-sb.df9 <- filter(sb.df8, Analyte %in% analytes)
+sb.df8 <- filter(sb.df7, Analyte %in% analytes)
 
 ## assign biodegradation, sorption, and chloramine oxidation categories for each analyte
-bsc.table <- read_excel(str_c(rmvcat.dir, "Biodeg-Sorp-ChloramineOx_key.xlsx")) %>%
+bsc.table <- read_excel(str_c(config.dir, "Biodeg-Sorp-ChloramineOx_key.xlsx")) %>%
   ### convert columns to factors
   mutate(Biodegradation = as.factor(Biodegradation),
          Sorption = as.factor(Sorption),
          ChloramineOxidation = as.factor(ChloramineOxidation))
 
-sb.df10 <- left_join(sb.df9, bsc.table)  # add biodegration, sorption, and Chloramine Oxidation categories to dataframe
+sb.df9 <- left_join(sb.df8, bsc.table)  # add biodegration, sorption, and Chloramine Oxidation categories to dataframe
 
 # save cleaned data
 clean.path <- str_c(ef.dir, "clean/", "southbend-lab-results_clean.rds")
-write.df <- sb.df10
+write.df <- sb.df9
 write_rds(x=write.df, path=clean.path)
