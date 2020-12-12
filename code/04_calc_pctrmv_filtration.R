@@ -19,12 +19,12 @@ df2 <- df1 %>%
          Triplicate == FALSE) %>%  # remove extra values from triplicate analysis
   filter(Process != "lab_blank") %>% 
   mutate(SampleDate = lubridate::floor_date(SampleDateTime, unit = "6 hours")) %>%  # round datetime to nearest 6 hours
-  select(Analyte, SampleDate, Process, DilutAndLimAdjResult, ProcessInfEff, Biodegradation, Sorption)
+  select(Analyte, SampleDate, Process, LimitAdjResult, ProcessInfEff, Biodegradation, Sorption)
 
 ## create influent and effluent columns for each filter
 df3 <- df2 %>%
   group_by(SampleDate, Analyte, ProcessInfEff) %>%
-  spread(key = ProcessInfEff, value = DilutAndLimAdjResult) %>%
+  spread(key = ProcessInfEff, value = LimitAdjResult) %>%
   filter(Process != "clearwell")  # just look at removal due to filtration for now 
 
 ## calculate percent removal

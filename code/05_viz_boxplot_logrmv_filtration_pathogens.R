@@ -1,4 +1,4 @@
-# purpose: create boxplots of percent removal of pathogens due to filtration
+# purpose: create boxplots of log removal of pathogens due to filtration
 # author: Billy Raseman
 
 # clear environment
@@ -16,7 +16,8 @@ library(readxl)  # read Excel spreadsheets
 calc.dir <- "./data/eurofins-data/calculated/"
 pctrmv.path <- str_c(calc.dir, "pctrmv-filtration.rds")
 df1 <- read_rds(path = pctrmv.path) %>%
-  filter(Analyte %in% c("Cryptosporidium", "Giardia"))
+  filter(Analyte %in% c("Cryptosporidium", "Giardia")) %>%
+  mutate(LogRmvFilt = log10(Influent/Effluent))  # calculate log removal 
 
 analytes <- df1$Analyte %>% unique
 filters <- c("TBF", "SMF", "DBF")
@@ -51,16 +52,17 @@ for (analyte in analytes) {
   temp.df2 <- filter(df2, Analyte == analyte)
   
   ## plots with full extent of removal data
-  p1 <- ggplot(temp.df2, aes(x=Process, y=PctRmvFilt)) +
+  p1 <- ggplot(temp.df2, aes(x=Process, y=LogRmvFilt)) +
     geom_boxplot() +
-    ylab("Removal by Filtration (%)") +
+    ylab("Log Removal") +
     xlab("Filter Type") +
     geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
     ggtitle(analyte) +
-    mytheme 
+    mytheme +
+    labs(subtitle = "sample sizes: SMF (n=7), TBF (n=7), DBF (n=6)")
   
   ### save plot as .tiff
-  tiff.name1 <- str_c(analyte, "_summary_boxplot_pctrmv-v-time_filtration_pathogens.tiff")
+  tiff.name1 <- str_c(analyte, "_summary_boxplot_logrmv-v-time_filtration_pathogens.tiff")
   tiff.path1 <- str_c(fig.dir, tiff.name1)
   tiff(filename = tiff.path1,
        height = 12, width = 17, units = 'cm',
@@ -68,17 +70,17 @@ for (analyte in analytes) {
   print(p1)
   dev.off()
   
-  ## plots with zoomed in view of removal data
-  p2 <- p1 + 
-    ylim(-50, 100) +
-    labs(subtitle = subtitle.zoom)
-  
-  ### save plot as .tiff
-  tiff.name2 <- str_c(analyte, "_summary_boxplot_pctrmv-v-time_filtration_pathogens_zoomed.tiff")
-  tiff.path2 <- str_c(fig.dir, tiff.name2)
-  tiff(filename = tiff.path2,
-       height = 12, width = 17, units = 'cm',
-       compression = "lzw", res = fig.resolution)
-  print(p2)
-  dev.off()
+  # ## plots with zoomed in view of removal data
+  # p2 <- p1 + 
+  #   ylim(-50, 100) +
+  #   labs(subtitle = subtitle.zoom)
+  # 
+  # ### save plot as .tiff
+  # tiff.name2 <- str_c(analyte, "_summary_boxplot_logrmv-v-time_filtration_pathogens_zoomed.tiff")
+  # tiff.path2 <- str_c(fig.dir, tiff.name2)
+  # tiff(filename = tiff.path2,
+  #      height = 12, width = 17, units = 'cm',
+  #      compression = "lzw", res = fig.resolution)
+  # print(p2)
+  # dev.off()
 }

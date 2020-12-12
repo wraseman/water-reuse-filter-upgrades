@@ -1,4 +1,4 @@
-# purpose: create boxplots of percent removal of CECs due to Chloramine Oxidation
+# purpose: create boxplots of percent removal of TrOCs due to Chloramine Oxidation
 # author: Billy Raseman
 
 # clear environment
@@ -61,7 +61,7 @@ p1 <- ggplot(df2, aes(x=Process, y=PctRmvChlormaineOx)) +
   mytheme 
 
 ### save plot as .tiff
-tiff.name1 <- str_c("summary_pctrmv_boxplots_ChlormaineOx_CECs.tiff")
+tiff.name1 <- str_c("summary_pctrmv_boxplots_ChlormaineOx_TrOCs.tiff")
 tiff.path1 <- str_c(fig.dir, tiff.name1)
 tiff(filename = tiff.path1,
      height = 12, width = 17, units = 'cm',
@@ -75,7 +75,7 @@ p2 <- p1 +
   labs(subtitle = subtitle.zoom)
 
 ### save plot as .tiff
-tiff.name2 <- str_c("summary_boxplot_pctrmv-v-time_ChlormaineOx_CECs_zoomed.tiff")
+tiff.name2 <- str_c("summary_boxplot_pctrmv-v-time_ChlormaineOx_TrOCs_zoomed.tiff")
 tiff.path2 <- str_c(fig.dir, tiff.name2)
 tiff(filename = tiff.path2,
      height = 12, width = 17, units = 'cm',

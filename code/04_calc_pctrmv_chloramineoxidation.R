@@ -19,7 +19,7 @@ df2 <- df1 %>%
          Triplicate == FALSE) %>%  # remove extra values from triplicate analysis
   filter(Process != "lab_blank") %>%
   mutate(SampleDate = lubridate::floor_date(SampleDateTime, unit = "6 hours")) %>%  # round datetime to nearest 6 hours
-  select(Analyte, SampleDate, Process, DilutAndLimAdjResult, ProcessInfEff, ChloramineOxidation)
+  select(Analyte, SampleDate, Process, LimitAdjResult, ProcessInfEff, ChloramineOxidation)
 
 ## create influent and effluent columns for each process type
 ##  source: https://tidyr.tidyverse.org/dev/articles/pivot.html
@@ -27,7 +27,7 @@ df3 <- df2 %>%
   filter(ProcessInfEff == "Effluent") %>%
   unite(ProcessWithInfEff, Process, ProcessInfEff) %>%
   group_by(SampleDate, Analyte) %>%
-  spread(key = ProcessWithInfEff, value = DilutAndLimAdjResult)
+  spread(key = ProcessWithInfEff, value = LimitAdjResult)
 
 ## create combined effluent for SMF and TBF (because these effluents mix before going into the clearwell)
 Q.tbf <- 1.71  # based on average flow 1.81 and 1.60 MGD from "Pages from LRD SCADA SCREENS.pdf"

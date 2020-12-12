@@ -32,11 +32,13 @@ source("./code/02_combine_all-labs.R")
 # step 3 - visualize the number of samples, concentration over time, and detects vs. non-detects
 source("./code/03_table_stats_inf-eff.R")  
 ## results: Table - statistics for TrOCs and pathogens in treatment plant influent for data associated with TBF and SMF
-source("./code/03_viz_num-samples.R") 
-## results: see ./figures/combined-lab-results/ for visualizations
-source("./code/03_viz_conc-v-time_detect-v-nondetect.R") 
-## results: see ./figures/combined-lab-results/*/detect-nondetect_bar-plots and
-##  ./figures/combined-lab-results/*/concentration-v-time/ for visualizations 
+
+## Scripts not needed anymore
+# source("./code/03_viz_num-samples.R") 
+# ## results: see ./figures/combined-lab-results/ for visualizations
+# source("./code/03_viz_conc-v-time_detect-v-nondetect.R") 
+# ## results: see ./figures/combined-lab-results/*/detect-nondetect_bar-plots and
+# ##  ./figures/combined-lab-results/*/concentration-v-time/ for visualizations 
 
 # step 4 - calculate percent removal of analytes due to filtration and Chloramine Oxidation
 source("./code/04_calc_pctrmv_chloramineoxidation.R")

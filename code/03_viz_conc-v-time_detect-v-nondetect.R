@@ -1,4 +1,4 @@
-# Purpose: visualize contaminants of emerging concern (CEC) concentrations
+# Purpose: visualize TrOC concentrations
 # Author: Billy Raseman
 
 # clear environment
@@ -34,8 +34,8 @@ for (analyte in analytes) {
                           Process == process)
   pc.analyte.units <- pc.analyte.df$Units %>% unique
   
-  ## plot concentration vs. time for each CEC for each type of filter
-  p1 <- ggplot(pc.analyte.df, aes(x = SampleDateTime, y = DilutAdjResult)) +
+  ## plot concentration vs. time for each TrOC for each type of filter
+  p1 <- ggplot(pc.analyte.df, aes(x = SampleDateTime, y = LimitAdjResult)) +
     geom_point(aes(color = ProcessInfEff)) +
     ylab(str_c("Concentration (", pc.analyte.units, ")")) +
     xlab("Time") + 
@@ -53,7 +53,7 @@ for (analyte in analytes) {
   print(p1)
   dev.off()
   
-  ## plot detects vs. non-detects for each CEC for each type of filter
+  ## plot detects vs. non-detects for each TrOC for each type of filter
   p2 <- pc.analyte.df %>% 
     ggplot(aes(ProcessInfEff)) +
     geom_bar(aes(fill=Detect)) +
