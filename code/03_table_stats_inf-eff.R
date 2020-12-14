@@ -22,15 +22,11 @@ num_to_two_char_string <- function (num) {
   return(two_char_string)
 }
 
-# read in cleaned data from lab samples tested in Eurofin's California lab
+# read in cleaned data from lab samples
 clean.dir <- "./data/eurofins-data/clean/"
 clean.path <- str_c(clean.dir, "combined-lab-results_clean.rds")
 df1 <- read_rds(path = clean.path) 
 
-# create summary based on dilution adjusted results
-## the reason that "DilutAdjResult" is used over the "Result" is that before running the 
-## samples, they were diluted. Therefore, a dilution of 10x means that the "Result" is 
-## actually 10x less than true value. 
 df2 <- select(df1, SampleDateTime, Analyte, Result, Detect, DetectionLimit, ProcessInfEff, LocationProcessType)
 
 ## Table 1: Statistics for TrOCs and pathogens in treatment plant influent for data associated with TBF and SMF
