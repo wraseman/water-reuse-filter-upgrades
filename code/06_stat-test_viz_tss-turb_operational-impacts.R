@@ -46,7 +46,7 @@ mytheme = theme(
   legend.text = element_text(size = 16))
 
 # read in data
-data.dir <- "./data/archive/"
+data.dir <- "./data/tss-turbidity/"
 filename1 <- "TSS and Turb 10152019.xlsx"
 path1 <- str_c(data.dir, filename1)
 df1 <- read_excel(path = path1, skip = 1, 
