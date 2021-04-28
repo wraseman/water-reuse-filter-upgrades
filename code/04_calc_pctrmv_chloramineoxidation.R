@@ -11,7 +11,7 @@ library(readxl)  # read Excel spreadsheets
 # read in cleaned data from lab samples tested in both of Eurofin's labs (California and South Bend)
 clean.dir <- "./data/eurofins-data/clean/"
 clean.path <- str_c(clean.dir, "combined-lab-results_clean.rds")
-df1 <- read_rds(path = clean.path) 
+df1 <- read_rds(clean.path) 
 
 # calculate percent removal for each analyte due to filtration (assuming concentration of non-detects is the detection limit)
 df2 <- df1 %>%

@@ -12,9 +12,9 @@ library(readxl)  # read Excel spreadsheets
 clean.dir <- "./data/eurofins-data/clean/"
 ca.path <- str_c(clean.dir, "california-lab-results_clean.rds")
 sb.path <- str_c(clean.dir, "southbend-lab-results_clean.rds")
-ca.df1 <- read_rds(path = ca.path) %>%
+ca.df1 <- read_rds(ca.path) %>%
   mutate(Lab = "California")
-sb.df1 <- read_rds(path = sb.path)  %>%
+sb.df1 <- read_rds(sb.path)  %>%
   mutate(Lab = "SouthBend")
 
 # check whether columns match between dataframes

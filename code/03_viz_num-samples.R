@@ -25,7 +25,7 @@ num_to_two_char_string <- function (num) {
 # read in cleaned data from lab samples tested in Eurofin's California lab
 clean.dir <- "./data/eurofins-data/clean/"
 clean.path <- str_c(clean.dir, "combined-lab-results_clean.rds")
-df1 <- read_rds(path = clean.path) 
+df1 <- read_rds(clean.path) 
 
 # visulize a single parameter for a single process at the influent and effluent
 # with for-loop, we can look at each individual parameters

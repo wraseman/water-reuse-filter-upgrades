@@ -11,7 +11,7 @@ library(readxl)  # read Excel spreadsheets
 # read in cleaned data from lab samples tested in both of Eurofin's labs (California and South Bend)
 calc.dir <- "./data/eurofins-data/calculated/"
 pctrmv.path <- str_c(calc.dir, "pctrmv-filtration.rds")
-df1 <- read_rds(path = pctrmv.path) 
+df1 <- read_rds(pctrmv.path) 
 
 # plot percent removal over time for each Analyte for each Filter type
 analytes <- unique(df1$Analyte)  # get array of different analytes

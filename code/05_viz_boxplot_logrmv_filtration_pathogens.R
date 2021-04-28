@@ -15,7 +15,7 @@ library(readxl)  # read Excel spreadsheets
 # read in percent removal data
 calc.dir <- "./data/eurofins-data/calculated/"
 pctrmv.path <- str_c(calc.dir, "pctrmv-filtration.rds")
-df1 <- read_rds(path = pctrmv.path) %>%
+df1 <- read_rds(pctrmv.path) %>%
   filter(Analyte %in% c("Cryptosporidium", "Giardia")) %>%
   mutate(LogRmvFilt = log10(Influent/Effluent))  # calculate log removal 
 

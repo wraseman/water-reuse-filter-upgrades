@@ -15,14 +15,14 @@ filters <- c("SMF+TBF", "DBF")
 # read in influent pathogen data
 clean.dir <- "./data/eurofins-data/clean/"
 clean.path <- str_c(clean.dir, "combined-lab-results_clean.rds")
-pathogen.df1 <- read_rds(path = clean.path) %>%
+pathogen.df1 <- read_rds(clean.path) %>%
   select(SampleDateTime, Analyte, Result, Detect, DetectionLimit, ProcessInfEff, LocationProcessType) %>%
   filter(Analyte %in% c("Giardia", "Cryptosporidium")) %>%
   mutate(date = as.Date(SampleDateTime))  # convert from datetime to date data type
 
 # read in influent turbidity data 
 particle.dir <- "./data/tss-turbidity/"
-particles.df1 <- read_rds(path = str_c(particle.dir, "TSS-turbidity.rds")) %>%
+particles.df1 <- read_rds(str_c(particle.dir, "TSS-turbidity.rds")) %>%
   select(date, turb_postfilt_SCADA_daily_avg) %>%
   mutate(date = as.Date(date))  # convert from datetime to date data type
 

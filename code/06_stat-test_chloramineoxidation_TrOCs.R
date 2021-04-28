@@ -14,7 +14,7 @@ filters <- c("SMF+TBF", "DBF")
 # read in percent removal data
 calc.dir <- "./data/eurofins-data/calculated/"
 pctrmv.path <- str_c(calc.dir, "pctrmv-chloramineoxidation.rds")
-df1 <- read_rds(path = pctrmv.path) %>%
+df1 <- read_rds(pctrmv.path) %>%
   filter(!(Analyte %in% c("Cryptosporidium", "Giardia"))) %>%
   filter(Analyte != "BPA")  # no Chloramine Oxidation category for BPA
 

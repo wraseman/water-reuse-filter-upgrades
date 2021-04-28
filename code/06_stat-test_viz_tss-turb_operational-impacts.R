@@ -2,11 +2,8 @@
 # Output: TSS-turbidity.rds
 # Author: William Raseman 
 
-# Note from Albrey: 
-# Ben, 
-# We discussed TSS data regarding the operational robustness of the filters. The attached spreadsheet contains daily TSS and Turbidity data at the following locations: 
-#   
-#   TSS at Chlorine contact chamber (DEP monitoring point – daily grab)
+# Data: 
+# TSS at Chlorine contact chamber (DEP monitoring point – daily grab)
 # TSS at Chlorine contact chamber (TSS meter – daily average)
 # Turbidity at Chlorine contact chamber (turbidity meter – daily average)
 # Turbidity at Chlorine contact chamber (turbidity meter – daily grab)
@@ -15,8 +12,6 @@
 # Clarifier 3 TSS 
 # Clarifier 4 TSS 
 # Filter Pump Station 1 TSS (mix of all 4 clarifiers before filters)
-# 
-# Albrey 
 
 # clear environment
 rm(list = ls())
@@ -127,6 +122,12 @@ dev.off()
 ## result of t Test
 tss.ttest <- t.test(x=df2.ph1$weekly_rollmean_TSS_effluent, y=df2.ph2$weekly_rollmean_TSS_effluent)$p.value
 turb.ttest <- t.test(x=df2.ph1$weekly_rollmean_turb_effluent, y=df2.ph2$weekly_rollmean_turb_effluent)$p.value
+
+library(ggpubr)
+ggqqplot(df2.ph1$weekly_rollmean_TSS_effluent)
+ggqqplot(df2.ph2$weekly_rollmean_TSS_effluent)
+ggqqplot(df2.ph1$weekly_rollmean_turb_effluent)
+ggqqplot(df2.ph2$weekly_rollmean_turb_effluent)
 
 # write data 
 write_rds(df1, str_c(data.dir, "TSS-turbidity.rds"))
