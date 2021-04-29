@@ -12,5 +12,7 @@ Benjamin D. Stanford, D. Albrey Arrington, William J. Raseman, and William C. Be
 
 # Organizations
 This project was carried out by the Loxahatchee River District (Jupiter, FL) and [Hazen and Sawyer](https://www.hazenandsawyer.com/)
-![Hazen Logo](hazen-logo.png)
-![LRD Logo](lrd-logo.png)
+<br><br>
+<img src="hazen-logo.jpg" alt="Hazen logo" width="200"/>
+<br><br>
+<img src="lrd-logo.png" alt="Loxahatchee River District logo" width="150"/>
