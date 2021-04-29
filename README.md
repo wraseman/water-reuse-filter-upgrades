@@ -10,6 +10,9 @@ Benjamin D. Stanford, D. Albrey Arrington, William J. Raseman, and William C. Be
 - ```figures/```: figures directory. Contains all figures produced by the R scripts. 
 - ```data/```: data directory. Contains all raw and cleaned data for the analysis. 
 
+# Running the Code
+To execute the code, first download/clone this repository and then download and install R and [R Studio](https://www.rstudio.com/products/rstudio/download/, if they are not already on your machine. Then navigate to this repository and open the ".Rproj" (R Studio project) file. This file automatically sets your working directory to the location of the .Rproj file which will enable the R scripts to run correctly (see [here](https://bookdown.org/ndphillips/YaRrr/projects-in-rstudio.html) for more details). If this file is not used, the user would have to modify each of the file/directory paths to match those on their local machine.
+
 # Organizations
 This project was carried out by the Loxahatchee River District (Jupiter, FL) and [Hazen and Sawyer](https://www.hazenandsawyer.com/)
 <br><br>
