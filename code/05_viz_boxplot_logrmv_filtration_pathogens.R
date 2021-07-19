@@ -59,6 +59,7 @@ for (analyte in analytes) {
     geom_hline(aes(yintercept=0), colour="red", linetype="dashed") +
     ggtitle(analyte) +
     mytheme +
+    ylim(-1, 2.75) +
     labs(subtitle = "sample sizes: SMF (n=7), TBF (n=7), DBF (n=6)")
   
   ### save plot as .tiff
