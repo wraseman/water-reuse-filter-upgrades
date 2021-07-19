@@ -122,4 +122,4 @@ sb.df9 <- left_join(sb.df8, bsc.table)  # add biodegration, sorption, and Chlora
 # save cleaned data
 clean.path <- str_c(ef.dir, "clean/", "southbend-lab-results_clean.rds")
 write.df <- sb.df9
-write_rds(x=write.df, path=clean.path)
+write_rds(x=write.df, file=clean.path)

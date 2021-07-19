@@ -187,4 +187,4 @@ ca.df10 <- unique(ca.df9)
 # save cleaned data
 clean.path <- str_c(ef.dir, "clean/", "california-lab-results_clean.rds")
 write.df <- ca.df10
-write_rds(x=write.df, path=clean.path)
+write_rds(x=write.df, file=clean.path)

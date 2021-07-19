@@ -38,4 +38,4 @@ df4 <- df3 %>%
 write.df <- df4
 ef.dir <- "./data/eurofins-data/"
 clean.path <- str_c(ef.dir, "calculated/", "pctrmv-filtration.rds")
-write_rds(x=write.df, path=clean.path)
+write_rds(x=write.df, file=clean.path)

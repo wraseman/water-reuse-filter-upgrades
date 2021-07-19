@@ -58,4 +58,4 @@ df6 <- df5 %>%
 write.df <- df6
 ef.dir <- "./data/eurofins-data/"
 clean.path <- str_c(ef.dir, "calculated/", "pctrmv-chloramineoxidation.rds")
-write_rds(x=write.df, path=clean.path)
+write_rds(x=write.df, file=clean.path)

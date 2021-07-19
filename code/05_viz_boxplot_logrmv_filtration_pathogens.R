@@ -26,7 +26,7 @@ filters <- c("TBF", "SMF", "DBF")
 fig.dir <- "./figures/combined-lab-results/"  # figure directory for California laboratory results
 pctrmv.dir <- "pctrmv-v-time/"
 fig.resolution <- 300  # figure resolution (300 dpi)
-subtitle.zoom <- "(negative outliers removed for readability)"
+subtitle.zoom <- "(extreme negative values removed)"
 mytheme = theme(
   axis.title.x = element_text(size = 16),
   axis.text.x = element_text(size = 16),
@@ -84,3 +84,4 @@ for (analyte in analytes) {
   # print(p2)
   # dev.off()
 }
+

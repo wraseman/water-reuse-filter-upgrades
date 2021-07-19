@@ -7,6 +7,7 @@ rm(list = ls())
 # load packages
 library(tidyverse)  # ggplot2, dplyr for data wrangling and visualization
 library(readxl)  # read Excel spreadsheets
+library(scales)
 
 # # user-defined functions
 # medianboxplt <- function(y) 
@@ -30,7 +31,7 @@ df1$ChloramineOxidation <- factor(df1$ChloramineOxidation,
 fig.dir <- "./figures/combined-lab-results/"  # figure directory for California laboratory results
 pctrmv.dir <- "pctrmv_boxplots/"
 fig.resolution <- 300  # figure resolution (300 dpi)
-subtitle.zoom <- "(negative outliers removed for readability)"
+subtitle.zoom <- "(extreme negative values removed)"
 mytheme = theme(
   axis.title.x = element_text(size = 16),
   axis.text.x = element_text(size = 16),
@@ -133,6 +134,7 @@ for (analyte in goodox.analytes) {
     xlab("Removal by Chloramine Oxidation (%)") +
     ylab("Number of Samples") +
     ggtitle(analyte) +
+    scale_y_continuous(breaks= pretty_breaks()) +
     mytheme
   
   tiff.name5 <- str_c(analyte, "_hist_pctrmv_by_ChlormaineOx.tiff")
