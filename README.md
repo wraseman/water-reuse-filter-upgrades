@@ -2,7 +2,7 @@
 Data and code for a study of filter upgrades at a municipal water reclamation facility. This study was designed to capture operational data, pathogen removal (Cryptosporidium and Giardia), and trace organic contaminant (TOrC) removal before the replacement of the filters using the existing synthetic media filters (SMF) and traveling bridge filters (TBF) followed by evaluation of the deep bed filters (DBF) after construction and commissioning.
 
 ## Reference 
-Benjamin D. Stanford, D. Albrey Arrington, William J. Raseman, and William C. Becker. "Improved Operational Reliability and Contaminant Removal in Water Reuse through Filter Upgrades" (in-review)
+Benjamin D. Stanford, D. Albrey Arrington, William J. Raseman, and William C. Becker. (2021) "Improved Operational Reliability and Contaminant Removal in Water Reuse through Filter Upgrades". AWWA Water Science (https://awwa.onlinelibrary.wiley.com/doi/epdf/10.1002/aws2.1253). 
 
 # Contents
 - ```code/```: R code directory. As the name suggests, 00_run-all-scripts.R, will execute all scripts to reproduce the results described in the paper. If this script is not used, users should run the scripts in numerical order based on the two digits in the filename for each script. For example, scripts starting with "03" typically depend on the results of scripts starting with "02". 
